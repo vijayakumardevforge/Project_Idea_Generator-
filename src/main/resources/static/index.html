@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Project Idea Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="background-animation">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <nav class="navbar glass">
+        <div class="container nav-content">
+            <div class="logo">
+                <i class="fa-solid fa-lightbulb gradient-text"></i>
+                <span class="gradient-text">IdeaGen AI</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" class="active" data-page="generate">Generate</a></li>
+                <li><a href="#" data-page="history">History</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Generate View -->
+        <section id="generate-view" class="view active">
+            <header class="view-header">
+                <h1 class="gradient-text">Spark Your Next Big Project</h1>
+                <p>Configure your preferences and let our AI generate a complete project roadmap tailored for you.</p>
+            </header>
+
+            <div class="glass form-container fade-in-up">
+                <form id="generate-form">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="skillLevel">Skill Level</label>
+                            <select id="skillLevel" required>
+                                <option value="" disabled selected>Select Level</option>
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate">Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="programmingLanguage">Programming Language</label>
+                            <select id="programmingLanguage" required>
+                                <option value="" disabled selected>Select Language</option>
+                                <option value="Java">Java</option>
+                                <option value="Python">Python</option>
+                                <option value="C#">C#</option>
+                                <option value="JavaScript">JavaScript</option>
+                                <option value="TypeScript">TypeScript</option>
+                                <option value="Go">Go</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="framework">Framework</label>
+                            <select id="framework" required>
+                                <option value="" disabled selected>Select Language First</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="projectDomain">Project Domain</label>
+                            <select id="projectDomain" required>
+                                <option value="" disabled selected>Select Domain</option>
+                                <option value="Education">Education</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Finance">Finance</option>
+                                <option value="E-Commerce">E-Commerce</option>
+                                <option value="AI">AI & Machine Learning</option>
+                                <option value="Productivity">Productivity</option>
+                                <option value="Entertainment">Entertainment</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary generate-btn">
+                        <span>Generate Project Idea</span>
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Loading State -->
+            <div id="loading-state" class="loading-container hidden">
+                <div class="loader"></div>
+                <p>AI is architecting your project...</p>
+            </div>
+
+            <!-- Result View -->
+            <div id="result-container" class="glass result-container hidden fade-in-up">
+                <!-- Result content will be injected here -->
+            </div>
+        </section>
+
+        <!-- History View -->
+        <section id="history-view" class="view hidden">
+            <header class="view-header">
+                <h1 class="gradient-text">Your Project Ideas</h1>
+                <p>Revisit your previously generated architectures.</p>
+            </header>
+
+            <div id="history-loading" class="loading-container">
+                <div class="loader"></div>
+                <p>Fetching history...</p>
+            </div>
+
+            <div id="history-grid" class="history-grid">
+                <!-- History cards will be injected here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Template for Result and History Details -->
+    <template id="project-details-template">
+        <div class="project-details">
+            <div class="tags">
+                <span class="tag skill-tag"></span>
+                <span class="tag lang-tag"></span>
+                <span class="tag framework-tag"></span>
+                <span class="tag domain-tag"></span>
+            </div>
+            
+            <h2 class="project-name"></h2>
+            <p class="project-description"></p>
+            
+            <div class="details-grid">
+                <div class="detail-card glass-inner">
+                    <h3><i class="fa-solid fa-star"></i> Key Features</h3>
+                    <ul class="feature-list"></ul>
+                </div>
+                
+                <div class="detail-card glass-inner">
+                    <h3><i class="fa-solid fa-database"></i> Suggested Tables</h3>
+                    <ul class="tables-list"></ul>
+                </div>
+                
+                <div class="detail-card glass-inner">
+                    <h3><i class="fa-solid fa-network-wired"></i> Key APIs / Endpoints</h3>
+                    <ul class="api-list"></ul>
+                </div>
+                
+                <div class="detail-card glass-inner">
+                    <h3><i class="fa-solid fa-map-location-dot"></i> Learning Roadmap</h3>
+                    <ul class="roadmap-list"></ul>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
