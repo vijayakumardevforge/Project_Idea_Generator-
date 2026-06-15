@@ -1,6 +1,6 @@
 # AI Project Idea Generator
 
-[**Live Demo (Vercel)**](https://project-idea-generator-one.vercel.app/)
+[**Live Demo (Render)**](https://project-idea-generator-bvbt.onrender.com/)
 
 A smart, AI-powered web application that generates custom software project ideas tailored to your skill level, preferred programming language, framework, and domain. It uses the Hugging Face API (Qwen model) to dynamically architect project ideas complete with descriptions, features, database tables, API endpoints, and a step-by-step learning roadmap.
 
@@ -92,10 +92,9 @@ http://localhost:8080
 
 ## 🌍 Deployment Architecture
 
-The application has been successfully deployed to the cloud using a modern, split-stack approach:
+The application has been successfully deployed to the cloud:
 
-- **Frontend Hosting:** [Vercel](https://vercel.com) (Static hosting for HTML/CSS/JS)
-- **Backend API:** [Render](https://render.com) (Dockerized Spring Boot application)
+- **Full-Stack Hosting:** [Render](https://render.com) (Runs the Spring Boot backend API and serves the frontend HTML/CSS/JS)
 - **Database:** [Supabase](https://supabase.com) (Managed PostgreSQL via connection pooling)
 - **AI Model:** Hugging Face API
 
