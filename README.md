@@ -1,5 +1,7 @@
 # AI Project Idea Generator
 
+[**Live Demo (Vercel)**](https://project-idea-generator-one.vercel.app/)
+
 A smart, AI-powered web application that generates custom software project ideas tailored to your skill level, preferred programming language, framework, and domain. It uses the Hugging Face API (Qwen model) to dynamically architect project ideas complete with descriptions, features, database tables, API endpoints, and a step-by-step learning roadmap.
 
 ## 🚀 Features
@@ -87,3 +89,19 @@ http://localhost:8080
 1. Fill out the form with your desired criteria (e.g., Python, Django, E-commerce, Intermediate).
 2. Click **Generate Idea**.
 3. Wait for the AI to process and return a comprehensive project architecture.
+
+## 🌍 Deployment Architecture
+
+The application has been successfully deployed to the cloud using a modern, split-stack approach:
+
+- **Frontend Hosting:** [Vercel](https://vercel.com) (Static hosting for HTML/CSS/JS)
+- **Backend API:** [Render](https://render.com) (Dockerized Spring Boot application)
+- **Database:** [Supabase](https://supabase.com) (Managed PostgreSQL via connection pooling)
+- **AI Model:** Hugging Face API
+
+### Cloud Environment Variables
+If deploying a fork of this project to Render, ensure the following environment variables are set:
+- `DB_URL`: The JDBC pooler URL from Supabase (e.g., `jdbc:postgresql://aws-x...pooler.supabase.com:5432/postgres`)
+- `DB_USERNAME`: Supabase pooler username
+- `DB_PASSWORD`: Supabase database password
+- `HUGGINGFACE_API_TOKEN`: Your Hugging Face API token
