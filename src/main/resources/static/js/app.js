@@ -8,9 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const historyGrid = document.getElementById('history-grid');
     const programmingLanguageSelect = document.getElementById('programmingLanguage');
     const frameworkSelect = document.getElementById('framework');
-
-    const API_BASE_URL = '/api/projects';
-
+    const API_BASE_URL = 'https://project-idea-generator-bvbt.onrender.com/api/projects';
     const frameworksByLanguage = {
         'Java': ['Spring Boot', 'Quarkus', 'Micronaut', 'Jakarta EE'],
         'Python': ['Django', 'Flask', 'FastAPI', 'Pyramid'],
