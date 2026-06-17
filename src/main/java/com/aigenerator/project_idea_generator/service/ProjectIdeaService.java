@@ -18,7 +18,7 @@ public class ProjectIdeaService {
         this.huggingFaceService = huggingFaceService;
     }
 
-    public ProjectIdea generateAndSaveProjectIdea(ProjectGenerationRequest request) {
+    public ProjectIdea generateAndSaveProjectIdea(ProjectGenerationRequest request, String ipAddress, String userAgent) {
         HuggingFaceService.GeneratedIdea generatedIdea = huggingFaceService.parseAndGenerateIdea(request);
 
         ProjectIdea idea = ProjectIdea.builder()
@@ -32,6 +32,8 @@ public class ProjectIdeaService {
                 .suggestedTables(generatedIdea.getSuggestedTables())
                 .recommendedEndpoints(generatedIdea.getRecommendedEndpoints())
                 .learningRoadmap(generatedIdea.getLearningRoadmap())
+                .ipAddress(ipAddress)
+                .userAgent(userAgent)
                 .build();
 
         return repository.save(idea);

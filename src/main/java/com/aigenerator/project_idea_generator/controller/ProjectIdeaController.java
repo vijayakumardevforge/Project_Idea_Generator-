@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/projects")
@@ -25,9 +26,21 @@ public class ProjectIdeaController {
     @PostMapping("/generate")
     public ResponseEntity<ProjectIdea> generateIdea(
             @Valid @RequestBody ProjectGenerationRequest request,
-            @RequestHeader(value = "X-Session-Id", required = false) String sessionId) {
+            @RequestHeader(value = "X-Session-Id", required = false) String sessionId,
+            HttpServletRequest httpRequest) {
             
-        ProjectIdea generatedIdea = service.generateAndSaveProjectIdea(request);
+        // Render passes the real IP in the X-Forwarded-For header. Fallback to direct remote address.
+        String ipAddress = httpRequest.getHeader("X-Forwarded-For");
+        if (ipAddress == null || ipAddress.isEmpty()) {
+            ipAddress = httpRequest.getRemoteAddr();
+        } else {
+            // X-Forwarded-For can contain multiple IPs, the first one is the client.
+            ipAddress = ipAddress.split(",")[0].trim();
+        }
+        
+        String userAgent = httpRequest.getHeader("User-Agent");
+            
+        ProjectIdea generatedIdea = service.generateAndSaveProjectIdea(request, ipAddress, userAgent);
         
         // Save to Redis cache if sessionId is provided
         if (sessionId != null && !sessionId.isEmpty()) {

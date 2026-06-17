@@ -49,6 +49,11 @@ public class ProjectIdea {
     @Column(columnDefinition = "jsonb")
     private List<String> learningRoadmap;
 
+    private String ipAddress;
+
+    @Column(columnDefinition = "TEXT")
+    private String userAgent;
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
