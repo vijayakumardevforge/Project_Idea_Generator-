@@ -11,13 +11,15 @@ A smart, AI-powered web application that generates custom software project ideas
 - **AI Integration:** Powered by Hugging Face's API (Qwen/Qwen2.5-7B-Instruct).
 - **Responsive UI:** Clean, modern frontend built with HTML, CSS, and Vanilla JavaScript.
 - **Robust Backend:** Built with Spring Boot and Java 21.
-- **Data Persistence:** Uses PostgreSQL to manage application data.
+- **Data Persistence:** Uses PostgreSQL to manage permanent application data.
+- **Session History:** Fast, temporary user history tracking utilizing Redis caching.
 
 ## 🛠️ Tech Stack
 
 - **Backend:** Java 21, Spring Boot 4.1.0, Spring Data JPA
 - **Frontend:** HTML5, CSS3, JavaScript
 - **Database:** PostgreSQL
+- **Cache:** Redis (Upstash)
 - **AI Provider:** Hugging Face API
 - **Build Tool:** Maven
 - **Utilities:** Lombok, Jackson
@@ -28,7 +30,8 @@ Before running the application, ensure you have the following installed:
 
 - **Java 21** or higher
 - **Maven**
-- **PostgreSQL** (running on default port `5432`)
+- **PostgreSQL** (running on default port `5432` or cloud)
+- **Redis** (running on default port `6379` or Upstash)
 - **Hugging Face API Token** (You can get one for free at [huggingface.co](https://huggingface.co/settings/tokens))
 
 ## ⚙️ Setup & Installation
@@ -61,7 +64,10 @@ $env:HUGGINGFACE_API_TOKEN="your_token_here"
 **Linux / macOS:**
 ```bash
 export HUGGINGFACE_API_TOKEN="your_token_here"
+export REDIS_URL="redis://localhost:6379"
 ```
+
+*Note: You can also use an `application-secrets.properties` file locally.*
 
 ### 3. Build and Run
 
@@ -96,6 +102,7 @@ The application has been successfully deployed to the cloud:
 
 - **Full-Stack Hosting:** [Render](https://render.com) (Runs the Spring Boot backend API and serves the frontend HTML/CSS/JS)
 - **Database:** [Supabase](https://supabase.com) (Managed PostgreSQL via connection pooling)
+- **Cache:** [Upstash](https://upstash.com) (Serverless Redis for session history)
 - **AI Model:** Hugging Face API
 
 ### Cloud Environment Variables
@@ -104,3 +111,4 @@ If deploying a fork of this project to Render, ensure the following environment 
 - `DB_USERNAME`: Supabase pooler username
 - `DB_PASSWORD`: Supabase database password
 - `HUGGINGFACE_API_TOKEN`: Your Hugging Face API token
+- `REDIS_URL`: Your Upstash Redis connection string
