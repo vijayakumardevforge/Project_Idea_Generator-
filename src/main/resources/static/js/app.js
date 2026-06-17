@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Session Management
+    let sessionId = localStorage.getItem('project_idea_session_id');
+    if (!sessionId) {
+        sessionId = 'session_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+        localStorage.setItem('project_idea_session_id', sessionId);
+    }
+
     const navLinks = document.querySelectorAll('.nav-links a');
     const views = document.querySelectorAll('.view');
     const generateForm = document.getElementById('generate-form');
@@ -8,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const historyGrid = document.getElementById('history-grid');
     const programmingLanguageSelect = document.getElementById('programmingLanguage');
     const frameworkSelect = document.getElementById('framework');
-    const API_BASE_URL = 'https://project-idea-generator-bvbt.onrender.com/api/projects';
+    const API_BASE_URL = 'http://localhost:8080/api/projects';
     const frameworksByLanguage = {
         'Java': ['Spring Boot', 'Quarkus', 'Micronaut', 'Jakarta EE'],
         'Python': ['Django', 'Flask', 'FastAPI', 'Pyramid'],
@@ -118,7 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${API_BASE_URL}/generate`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-Session-Id': sessionId
                 },
                 body: JSON.stringify(requestData)
             });
@@ -149,17 +157,23 @@ document.addEventListener('DOMContentLoaded', () => {
         historyLoading.classList.remove('hidden');
 
         try {
-            const response = await fetch(`${API_BASE_URL}/history`);
+            const response = await fetch(`${API_BASE_URL}/history`, {
+                headers: {
+                    'X-Session-Id': sessionId
+                }
+            });
             if (!response.ok) throw new Error('Failed to fetch history');
 
-            const projects = await response.json();
+            const data = await response.json();
             historyLoading.classList.add('hidden');
 
-            if (projects.length === 0) {
-                historyGrid.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1;">No projects generated yet. Head over to the Generate tab!</p>';
+            if (data.message === "no history" || data.length === 0) {
+                historyGrid.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1;">no history</p>';
                 return;
             }
 
+            const projects = Array.isArray(data) ? data : (data.data || []);
+            
             projects.forEach(project => {
                 const card = createHistoryCard(project);
                 historyGrid.appendChild(card);
