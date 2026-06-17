@@ -301,6 +301,21 @@ select option {
     transform: translateY(0);
 }
 
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+    border: 1px solid var(--glass-border);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.btn-secondary:active {
+    transform: translateY(0);
+}
+
 /* Loading State */
 .loading-container {
     display: flex;
@@ -491,4 +506,50 @@ select option {
     .project-name {
         font-size: 2rem;
     }
+}
+
+/* PDF Export Styles */
+.pdf-export {
+    background-color: #ffffff !important;
+    padding: 2rem;
+    color: #000000 !important;
+    border-radius: 0;
+}
+
+.pdf-export .project-name,
+.pdf-export h2,
+.pdf-export h3 {
+    color: #000000 !important;
+}
+
+.pdf-export .project-description {
+    color: #333333 !important;
+}
+
+.pdf-export .details-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.pdf-export .detail-card {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-bottom: 1rem;
+    background: #f8f9fa !important;
+    border: 1px solid #e9ecef !important;
+    box-shadow: none !important;
+}
+
+.pdf-export .detail-card h3 {
+    color: #000000 !important;
+    border-bottom: 1px solid #dddddd !important;
+}
+
+.pdf-export .detail-card li {
+    color: #333333 !important;
+}
+
+.pdf-export .tags {
+    margin-bottom: 1.5rem;
 }

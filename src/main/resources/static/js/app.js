@@ -35,9 +35,35 @@ document.addEventListener('DOMContentLoaded', () => {
             option.textContent = fw;
             frameworkSelect.appendChild(option);
         });
+        updateDomains();
+    }
+
+    const projectDomainSelect = document.getElementById('projectDomain');
+    function updateDomains() {
+        const lang = programmingLanguageSelect.value;
+        const fw = frameworkSelect.value;
+        
+        let ragOption = Array.from(projectDomainSelect.options).find(opt => opt.value === 'RAG');
+        
+        if (lang === 'Java' && fw === 'Spring Boot') {
+            if (!ragOption) {
+                const option = document.createElement('option');
+                option.value = 'RAG';
+                option.textContent = 'RAG (Retrieval-Augmented Generation)';
+                projectDomainSelect.appendChild(option);
+            }
+        } else {
+            if (ragOption) {
+                if (projectDomainSelect.value === 'RAG') {
+                    projectDomainSelect.value = '';
+                }
+                ragOption.remove();
+            }
+        }
     }
 
     programmingLanguageSelect.addEventListener('change', updateFrameworks);
+    frameworkSelect.addEventListener('change', updateDomains);
     
     // Fallbacks in case the browser autofills the language without firing a change event
     frameworkSelect.addEventListener('focus', updateFrameworks);
@@ -167,19 +193,67 @@ document.addEventListener('DOMContentLoaded', () => {
         
         container.innerHTML = '';
         
-        // Add a back button if in result view
+        // Add action buttons if in result view
         if (container.id === 'result-container') {
+            const buttonsContainer = document.createElement('div');
+            buttonsContainer.style.display = 'flex';
+            buttonsContainer.style.gap = '1rem';
+            buttonsContainer.style.marginBottom = '2rem';
+            buttonsContainer.style.flexWrap = 'wrap';
+
             const backBtn = document.createElement('button');
-            backBtn.className = 'btn btn-primary';
-            backBtn.style.marginTop = '2rem';
+            backBtn.className = 'btn btn-secondary';
             backBtn.style.width = 'auto';
-            backBtn.innerHTML = '<i class="fa-solid fa-arrow-left"></i> Generate Another';
+            backBtn.innerHTML = '<i class="fa-solid fa-arrow-left"></i> Start Over';
             backBtn.onclick = () => {
                 container.classList.add('hidden');
                 generateForm.parentElement.classList.remove('hidden');
                 generateForm.reset();
+                lastLanguage = '';
+                frameworkSelect.innerHTML = '<option value="" disabled selected>Select Language First</option>';
+                updateDomains();
             };
-            template.querySelector('.project-details').appendChild(backBtn);
+
+            const regenerateBtn = document.createElement('button');
+            regenerateBtn.className = 'btn btn-primary';
+            regenerateBtn.style.width = 'auto';
+            regenerateBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Regenerate Idea';
+            regenerateBtn.onclick = () => {
+                generateForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            };
+
+            const downloadPdfBtn = document.createElement('button');
+            downloadPdfBtn.className = 'btn btn-secondary';
+            downloadPdfBtn.style.width = 'auto';
+            downloadPdfBtn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Download PDF';
+            downloadPdfBtn.onclick = () => {
+                const element = document.querySelector('.project-details');
+                
+                // Configure PDF options
+                const opt = {
+                    margin:       [0.5, 0.5], // 0.5 inch margins
+                    filename:     `${project.projectName.replace(/[^a-zA-Z0-9]/g, '_')}_Idea.pdf`,
+                    image:        { type: 'jpeg', quality: 1.0 },
+                    html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
+                    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+                };
+                
+                // Hide buttons before PDF generation and add PDF specific styling class
+                buttonsContainer.style.display = 'none';
+                element.classList.add('pdf-export');
+                
+                html2pdf().set(opt).from(element).save().then(() => {
+                    // Revert UI changes after generation
+                    buttonsContainer.style.display = 'flex';
+                    element.classList.remove('pdf-export');
+                });
+            };
+
+            buttonsContainer.appendChild(backBtn);
+            buttonsContainer.appendChild(regenerateBtn);
+            buttonsContainer.appendChild(downloadPdfBtn);
+            template.querySelector('.project-details').prepend(buttonsContainer);
         }
 
         container.appendChild(template);
