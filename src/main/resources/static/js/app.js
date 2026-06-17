@@ -15,7 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const historyGrid = document.getElementById('history-grid');
     const programmingLanguageSelect = document.getElementById('programmingLanguage');
     const frameworkSelect = document.getElementById('framework');
-    const API_BASE_URL = 'http://localhost:8080/api/projects';
+    const API_BASE_URL = window.location.protocol === 'file:' 
+        ? 'http://localhost:8080/api/projects' 
+        : '/api/projects';
     const frameworksByLanguage = {
         'Java': ['Spring Boot', 'Quarkus', 'Micronaut', 'Jakarta EE'],
         'Python': ['Django', 'Flask', 'FastAPI', 'Pyramid'],
