@@ -123,12 +123,25 @@ document.addEventListener('DOMContentLoaded', () => {
         resultContainer.classList.add('hidden');
         loadingState.classList.remove('hidden');
 
+        let clientUserAgent = navigator.userAgent;
+        if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+            try {
+                const ua = await navigator.userAgentData.getHighEntropyValues(["model"]);
+                if (ua.model) {
+                    clientUserAgent = `${navigator.userAgent} [Model: ${ua.model}]`;
+                }
+            } catch (err) {
+                console.error("Error getting client hints", err);
+            }
+        }
+
         try {
             const response = await fetch(`${API_BASE_URL}/generate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Session-Id': sessionId
+                    'X-Session-Id': sessionId,
+                    'X-Client-User-Agent': clientUserAgent
                 },
                 body: JSON.stringify(requestData)
             });

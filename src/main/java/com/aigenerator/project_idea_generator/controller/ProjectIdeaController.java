@@ -38,7 +38,10 @@ public class ProjectIdeaController {
             ipAddress = ipAddress.split(",")[0].trim();
         }
         
-        String userAgent = httpRequest.getHeader("User-Agent");
+        String userAgent = httpRequest.getHeader("X-Client-User-Agent");
+        if (userAgent == null || userAgent.isEmpty()) {
+            userAgent = httpRequest.getHeader("User-Agent");
+        }
             
         ProjectIdea generatedIdea = service.generateAndSaveProjectIdea(request, ipAddress, userAgent);
         
