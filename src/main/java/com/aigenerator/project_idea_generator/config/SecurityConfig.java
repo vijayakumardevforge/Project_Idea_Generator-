@@ -25,7 +25,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().permitAll()
             )
-            .httpBasic(Customizer.withDefaults()); // Use basic auth for the admin endpoints
+            .httpBasic(basic -> basic.authenticationEntryPoint((request, response, authException) -> 
+                response.sendError(401, "Unauthorized")
+            ));
         return http.build();
     }
 
