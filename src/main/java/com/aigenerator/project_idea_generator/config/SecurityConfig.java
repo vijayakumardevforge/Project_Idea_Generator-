@@ -29,10 +29,10 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @org.springframework.beans.factory.annotation.Value("${admin.username:vijay}")
+    @org.springframework.beans.factory.annotation.Value("${admin.username:admin}")
     private String adminUsername;
 
-    @org.springframework.beans.factory.annotation.Value("${admin.password:m6jm8op7m}")
+    @org.springframework.beans.factory.annotation.Value("${admin.password:password}")
     private String adminPassword;
 
     @Bean
