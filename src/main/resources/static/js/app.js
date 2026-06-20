@@ -246,9 +246,28 @@ document.addEventListener('DOMContentLoaded', () => {
             const regenerateBtn = document.createElement('button');
             regenerateBtn.className = 'btn btn-primary';
             regenerateBtn.style.width = 'auto';
-            regenerateBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Regenerate Idea';
+            
+            let timeLeft = 10;
+            regenerateBtn.disabled = true;
+            regenerateBtn.style.cursor = 'not-allowed';
+            regenerateBtn.innerHTML = `<i class="fa-solid fa-rotate-right"></i> Regenerate Idea (${timeLeft}s)`;
+            
+            const timerInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    regenerateBtn.innerHTML = `<i class="fa-solid fa-rotate-right"></i> Regenerate Idea (${timeLeft}s)`;
+                } else {
+                    clearInterval(timerInterval);
+                    regenerateBtn.disabled = false;
+                    regenerateBtn.style.cursor = 'pointer';
+                    regenerateBtn.innerHTML = `<i class="fa-solid fa-rotate-right"></i> Regenerate Idea`;
+                }
+            }, 1000);
+
             regenerateBtn.onclick = () => {
-                generateForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                if (!regenerateBtn.disabled) {
+                    generateForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                }
             };
 
             const downloadPdfBtn = document.createElement('button');
@@ -283,6 +302,29 @@ document.addEventListener('DOMContentLoaded', () => {
             buttonsContainer.appendChild(regenerateBtn);
             buttonsContainer.appendChild(downloadPdfBtn);
             template.querySelector('.project-details').prepend(buttonsContainer);
+            
+            if (!sessionStorage.getItem('duplicateWarningShown')) {
+                const warningMsg = document.createElement('div');
+                warningMsg.className = 'glass-inner';
+                warningMsg.style.backgroundColor = 'rgba(245, 158, 11, 0.05)';
+                warningMsg.style.border = '1px solid rgba(245, 158, 11, 0.2)';
+                warningMsg.style.borderLeft = '4px solid #f59e0b';
+                warningMsg.style.padding = '1rem';
+                warningMsg.style.marginBottom = '1.5rem';
+                warningMsg.style.borderRadius = '0.5rem';
+                warningMsg.style.display = 'flex';
+                warningMsg.style.justifyContent = 'space-between';
+                warningMsg.style.alignItems = 'center';
+                warningMsg.innerHTML = `
+                    <div>
+                        <i class="fa-solid fa-circle-info" style="color: #f59e0b; margin-right: 8px;"></i>
+                        <span style="color: var(--text-light);"><strong>Note:</strong> Sometimes the AI might give a similar result. If that happens, just click <strong>Regenerate Idea</strong> for a fresh one!</span>
+                    </div>
+                    <i class="fa-solid fa-xmark" style="cursor: pointer; color: var(--text-muted);" onclick="this.parentElement.style.display='none'"></i>
+                `;
+                template.querySelector('.project-details').prepend(warningMsg);
+                sessionStorage.setItem('duplicateWarningShown', 'true');
+            }
         }
 
         container.appendChild(template);
