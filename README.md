@@ -11,6 +11,7 @@ A smart, AI-powered web application that generates custom software project ideas
 - **AI Integration:** Powered by Hugging Face's API (Qwen/Qwen2.5-7B-Instruct).
 - **Responsive UI:** Clean, modern frontend built with HTML, CSS, and Vanilla JavaScript.
 - **Robust Backend:** Built with Spring Boot and Java 21.
+- **Security Features:** Tracks failed login attempts to prevent brute-force attacks and utilizes secure database connection practices with Supabase.
 - **Data Persistence:** Uses PostgreSQL to manage permanent application data.
 - **Session History:** Fast, temporary user history tracking utilizing Redis caching.
 
