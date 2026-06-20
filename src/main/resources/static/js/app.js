@@ -86,12 +86,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Navigation Logic
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
+            const targetPage = link.getAttribute('data-page');
+            
+            // If the link does not have a data-page, let the browser handle it normally (like the Admin link)
+            if (!targetPage) return;
+            
             e.preventDefault();
-            const targetPage = e.target.getAttribute('data-page');
             
             // Update active link
             navLinks.forEach(l => l.classList.remove('active'));
-            e.target.classList.add('active');
+            link.classList.add('active');
             
             // Show target view
             views.forEach(view => {
@@ -155,6 +159,20 @@ document.addEventListener('DOMContentLoaded', () => {
             
             loadingState.classList.add('hidden');
             resultContainer.classList.remove('hidden');
+            
+            // Increment generation count and prompt for feedback
+            if (typeof generationCount !== 'undefined') {
+                generationCount++;
+                sessionStorage.setItem('generationCount', generationCount);
+                if (generationCount === 3 && !sessionStorage.getItem('feedbackPrompted')) {
+                    setTimeout(() => {
+                        if (typeof openFeedbackModal === 'function') {
+                            openFeedbackModal();
+                            sessionStorage.setItem('feedbackPrompted', 'true');
+                        }
+                    }, 1500);
+                }
+            }
             
         } catch (error) {
             console.error(error);
@@ -375,4 +393,96 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return div;
     }
+
+    // Feedback Logic
+    const feedbackModal = document.getElementById('feedback-modal');
+    const floatingFeedbackBtn = document.getElementById('floating-feedback-btn');
+    const closeFeedback = document.querySelector('.close-modal');
+    const stars = document.querySelectorAll('.star-rating i');
+    const ratingInput = document.getElementById('rating-value');
+    const feedbackForm = document.getElementById('feedback-form');
+    const feedbackSuccess = document.getElementById('feedback-success');
+    
+    window.generationCount = parseInt(sessionStorage.getItem('generationCount') || '0');
+
+    window.openFeedbackModal = function() {
+        feedbackModal.classList.remove('hidden');
+        feedbackSuccess.classList.add('hidden');
+        feedbackForm.style.display = 'block';
+        feedbackForm.reset();
+        ratingInput.value = '0';
+        updateStars(0);
+    }
+
+    floatingFeedbackBtn.addEventListener('click', openFeedbackModal);
+    closeFeedback.addEventListener('click', () => feedbackModal.classList.add('hidden'));
+
+    stars.forEach(star => {
+        star.addEventListener('click', (e) => {
+            const rating = parseInt(e.target.getAttribute('data-rating'));
+            ratingInput.value = rating;
+            updateStars(rating);
+        });
+        
+        star.addEventListener('mouseover', (e) => {
+            updateStars(parseInt(e.target.getAttribute('data-rating')));
+        });
+        
+        star.addEventListener('mouseout', () => {
+            updateStars(parseInt(ratingInput.value));
+        });
+    });
+
+    function updateStars(rating) {
+        stars.forEach(star => {
+            if (parseInt(star.getAttribute('data-rating')) <= rating) {
+                star.classList.remove('fa-regular');
+                star.classList.add('fa-solid');
+                star.classList.add('active');
+            } else {
+                star.classList.remove('fa-solid');
+                star.classList.add('fa-regular');
+                star.classList.remove('active');
+            }
+        });
+    }
+
+    feedbackForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const feedbackData = {
+            stars: parseInt(ratingInput.value),
+            email: document.getElementById('feedback-email').value,
+            message: document.getElementById('feedback-message').value
+        };
+
+        if (feedbackData.stars === 0) {
+            alert('Please select a star rating');
+            return;
+        }
+
+        const feedbackApiUrl = API_BASE_URL.replace('/projects', '/feedback');
+
+        try {
+            const response = await fetch(feedbackApiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(feedbackData)
+            });
+
+            if (response.ok) {
+                feedbackForm.style.display = 'none';
+                feedbackSuccess.classList.remove('hidden');
+                setTimeout(() => {
+                    feedbackModal.classList.add('hidden');
+                }, 2000);
+            } else {
+                alert('Failed to submit feedback');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Error submitting feedback');
+        }
+    });
+
 });

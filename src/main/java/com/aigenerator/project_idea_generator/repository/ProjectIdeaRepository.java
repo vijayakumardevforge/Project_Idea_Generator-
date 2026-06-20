@@ -6,7 +6,16 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import java.time.LocalDateTime;
+
 @Repository
 public interface ProjectIdeaRepository extends JpaRepository<ProjectIdea, Long> {
     List<ProjectIdea> findAllByOrderByCreatedAtDesc();
+
+    long countByCreatedAtAfter(LocalDateTime date);
+
+    @Query("SELECT COUNT(DISTINCT p.ipAddress) FROM ProjectIdea p WHERE p.createdAt >= :date")
+    long countDistinctUsersToday(@Param("date") LocalDateTime date);
 }

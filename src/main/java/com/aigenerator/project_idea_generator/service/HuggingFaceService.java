@@ -87,6 +87,7 @@ public class HuggingFaceService {
                "specifically tailored for a " + request.getSkillLevel() + " developer using " + 
                request.getProgrammingLanguage() + " with the " + request.getFramework() + " framework " +
                "in the " + request.getProjectDomain() + " domain.\n\n" +
+               "CRITICAL: You MUST write your ENTIRE response strictly in ENGLISH ONLY. Do not use Chinese or any other language.\n\n" +
                "Please provide a completely unique idea each time. (Request ID: " + java.util.UUID.randomUUID().toString() + ")\n" +
                "Make sure the complexity perfectly matches the '" + request.getSkillLevel() + "' level. " +
                "For the API endpoints, do not just limit it to REST! Depending on what is best for the project and framework, " +
