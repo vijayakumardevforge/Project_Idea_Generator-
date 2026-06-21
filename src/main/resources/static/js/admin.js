@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Error loading feedback:', error);
-            feedbackBody.innerHTML = '<tr><td colspan="4" style="color: #ef4444; text-align: center;">Failed to load feedback.</td></tr>';
+            feedbackBody.innerHTML = '<tr class="empty-row"><td colspan="4" style="color: #ef4444; text-align: center;">Failed to load feedback.</td></tr>';
         }
     }
 
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const summaryText = document.getElementById('recent-feedback-summary');
         
         if (feedbacks.length === 0) {
-            feedbackBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No feedback received yet.</td></tr>';
+            feedbackBody.innerHTML = '<tr class="empty-row"><td colspan="4" style="text-align: center;">No feedback received yet.</td></tr>';
             if(summaryText) summaryText.textContent = '';
             return;
         }
@@ -139,15 +139,15 @@ document.addEventListener('DOMContentLoaded', () => {
             starsHtml += '</div>';
 
             tr.innerHTML = `
-                <td>
+                <td data-label="Date">
                     <div style="line-height: 1.5; color: #9ca3af;">
                         ${dateStr}<br>${yearStr},<br>${timeStr}
                     </div>
                     ${badgeHtml}
                 </td>
-                <td><a href="mailto:${fb.email}" style="color: #60a5fa; text-decoration: underline; text-underline-offset: 4px;">${fb.email}</a></td>
-                <td>${starsHtml}</td>
-                <td style="max-width: 300px; word-wrap: break-word; color: #9ca3af; line-height: 1.6;">${fb.message}</td>
+                <td data-label="Email"><a href="mailto:${fb.email}" style="color: #60a5fa; text-decoration: underline; text-underline-offset: 4px; word-break: break-all;">${fb.email}</a></td>
+                <td data-label="Rating">${starsHtml}</td>
+                <td data-label="Message" style="color: #9ca3af; line-height: 1.6; word-break: break-word;">${fb.message}</td>
             `;
             
             feedbackBody.appendChild(tr);
@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Error loading failed logins:', error);
-            failedLoginBody.innerHTML = '<tr><td colspan="3" style="color: #ef4444; text-align: center;">Failed to load data.</td></tr>';
+            failedLoginBody.innerHTML = '<tr class="empty-row"><td colspan="3" style="color: #ef4444; text-align: center;">Failed to load data.</td></tr>';
         }
     }
 
@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = '';
         
         if (failedLogins.length === 0) {
-            container.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No failed login attempts recorded. Secure!</td></tr>';
+            container.innerHTML = '<tr class="empty-row"><td colspan="3" style="text-align: center; color: var(--text-muted);">No failed login attempts recorded. Secure!</td></tr>';
             return;
         }
 
@@ -190,9 +190,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             tr.innerHTML = `
-                <td>${date}</td>
-                <td style="color: #ef4444; font-weight: 500;">${attempt.username}</td>
-                <td style="font-family: monospace;">${attempt.ipAddress || 'Unknown'}</td>
+                <td data-label="Date & Time">${date}</td>
+                <td data-label="Username Attempted" style="color: #ef4444; font-weight: 500; word-break: break-all;">${attempt.username}</td>
+                <td data-label="IP Address" style="font-family: monospace;">${attempt.ipAddress || 'Unknown'}</td>
             `;
             container.appendChild(tr);
         });
