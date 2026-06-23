@@ -47,4 +47,18 @@ public class ProjectIdeaService {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Project idea not found with id: " + id));
     }
+
+    public ProjectIdea generateAndSaveRoadmap(Long id) {
+        ProjectIdea idea = getProjectById(id);
+        
+        // Don't regenerate if we already have it
+        if (idea.getDetailedRoadmap() != null && !idea.getDetailedRoadmap().isEmpty()) {
+            return idea;
+        }
+
+        String roadmap = huggingFaceService.generateDetailedRoadmap(idea);
+        idea.setDetailedRoadmap(roadmap);
+        
+        return repository.save(idea);
+    }
 }

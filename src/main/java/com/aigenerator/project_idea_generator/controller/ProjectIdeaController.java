@@ -73,4 +73,9 @@ public class ProjectIdeaController {
     public ResponseEntity<ProjectIdea> getProjectById(@PathVariable Long id) {
         return ResponseEntity.ok(service.getProjectById(id));
     }
+
+    @PostMapping("/{id}/roadmap")
+    public ResponseEntity<ProjectIdea> generateRoadmap(@PathVariable Long id) {
+        return ResponseEntity.ok(service.generateAndSaveRoadmap(id));
+    }
 }

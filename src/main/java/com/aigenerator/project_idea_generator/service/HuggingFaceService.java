@@ -28,8 +28,11 @@ public class HuggingFaceService {
     @Value("${huggingface.api.url}")
     private String apiUrl;
 
-    @Value("${huggingface.api.token}")
-    private String apiToken;
+    @Value("${huggingface.api.token.idea}")
+    private String apiTokenIdea;
+
+    @Value("${huggingface.api.token.roadmap}")
+    private String apiTokenRoadmap;
 
     public HuggingFaceService() {
         this.restClient = RestClient.create();
@@ -44,30 +47,101 @@ public class HuggingFaceService {
         requestBody.put("temperature", 0.9);
         requestBody.put("messages", List.of(Map.of("role", "user", "content", prompt)));
 
-        try {
-            log.info("Sending request to Hugging Face API via router");
-            byte[] responseBytes = restClient.post()
-                    .uri(apiUrl)
-                    .header("Authorization", "Bearer " + apiToken)
-                    .header("x-use-cache", "0")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(requestBody)
-                    .retrieve()
-                    .body(byte[].class);
+        int maxRetries = 3;
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                log.info("Sending request to Hugging Face API (Attempt {}/{})", attempt, maxRetries);
+                byte[] responseBytes = restClient.post()
+                        .uri(apiUrl)
+                        .header("Authorization", "Bearer " + apiTokenIdea)
+                        .header("x-use-cache", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(requestBody)
+                        .retrieve()
+                        .body(byte[].class);
 
-            JsonNode rootNode = objectMapper.readTree(responseBytes);
+                JsonNode rootNode = objectMapper.readTree(responseBytes);
 
-            if (rootNode != null && rootNode.has("choices") && rootNode.get("choices").isArray() && !rootNode.get("choices").isEmpty()) {
-                String generatedText = rootNode.get("choices").get(0).path("message").path("content").asText();
-                // Extract just the JSON part from the response if the model added extra text
-                return extractJsonFromResponse(generatedText, prompt);
+                if (rootNode != null && rootNode.has("choices") && rootNode.get("choices").isArray() && !rootNode.get("choices").isEmpty()) {
+                    String generatedText = rootNode.get("choices").get(0).path("message").path("content").asText();
+                    // Extract just the JSON part from the response if the model added extra text
+                    return extractJsonFromResponse(generatedText, prompt);
+                }
+            } catch (Exception e) {
+                log.warn("Error communicating with Hugging Face API or parsing JSON on attempt {}: {}", attempt, e.getMessage());
+                if (attempt == maxRetries) {
+                    log.error("All retries exhausted. Using mock fallback.", e);
+                    return createMockIdea(request);
+                }
             }
-        } catch (Exception e) {
-            log.error("Error communicating with Hugging Face API. Using mock fallback.", e);
-            return createMockIdea(request);
         }
 
-        throw new RuntimeException("Empty response from AI.");
+        return createMockIdea(request);
+    }
+
+    public String generateDetailedRoadmap(com.aigenerator.project_idea_generator.model.ProjectIdea idea) {
+        String prompt = buildRoadmapPrompt(idea);
+        
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", "Qwen/Qwen2.5-7B-Instruct");
+        requestBody.put("temperature", 0.7); // slightly lower temperature for more structured planning
+        requestBody.put("messages", List.of(Map.of("role", "user", "content", prompt)));
+
+        int maxRetries = 3;
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                log.info("Sending roadmap request to Hugging Face API (Attempt {}/{})", attempt, maxRetries);
+                byte[] responseBytes = restClient.post()
+                        .uri(apiUrl)
+                        .header("Authorization", "Bearer " + apiTokenRoadmap)
+                        .header("x-use-cache", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(requestBody)
+                        .retrieve()
+                        .body(byte[].class);
+
+                JsonNode rootNode = objectMapper.readTree(responseBytes);
+
+                if (rootNode != null && rootNode.has("choices") && rootNode.get("choices").isArray() && !rootNode.get("choices").isEmpty()) {
+                    String generatedText = rootNode.get("choices").get(0).path("message").path("content").asText();
+                    return cleanMarkdownResponse(generatedText, prompt);
+                }
+            } catch (Exception e) {
+                log.warn("Error communicating with Hugging Face API for roadmap on attempt {}: {}", attempt, e.getMessage());
+                if (attempt == maxRetries) {
+                    log.error("All retries exhausted for roadmap. Using mock fallback.", e);
+                    return "## Implementation Plan for " + idea.getProjectName() + "\n\n" +
+                           "*(Mock Roadmap generated due to API error)*\n\n" +
+                           "### Sprint 1: Setup\n- Initialize the " + idea.getFramework() + " project\n- Setup Database\n\n" +
+                           "### Sprint 2: Core Features\n- Implement core logic and APIs\n\n" +
+                           "### Sprint 3: UI & Polish\n- Build frontend\n- Final testing";
+                }
+            }
+        }
+
+        throw new RuntimeException("Empty response from AI for roadmap.");
+    }
+
+    private String buildRoadmapPrompt(com.aigenerator.project_idea_generator.model.ProjectIdea idea) {
+        return "<s>[INST] You are an expert Technical Project Manager and Lead Architect. " +
+               "Generate a highly detailed, step-by-step Sprint Roadmap to build the following project:\n\n" +
+               "**Project Name:** " + idea.getProjectName() + "\n" +
+               "**Description:** " + idea.getProjectDescription() + "\n" +
+               "**Tech Stack:** " + idea.getProgrammingLanguage() + " with " + idea.getFramework() + "\n" +
+               "**Skill Level:** " + idea.getSkillLevel() + "\n\n" +
+               "CRITICAL: You MUST write your ENTIRE response strictly in ENGLISH ONLY.\n\n" +
+               "Provide the response formatted in beautiful Markdown. " +
+               "Organize the roadmap into logical 'Sprints' or 'Phases' (e.g., Phase 1: Environment Setup, Phase 2: Database Design). " +
+               "Under each Sprint, provide a bulleted list of specific, actionable tasks tailored to the framework (" + idea.getFramework() + "). " +
+               "Do NOT wrap your entire response in a JSON block, just output pure Markdown text. [/INST]";
+    }
+
+    private String cleanMarkdownResponse(String responseText, String prompt) {
+        String cleanText = responseText;
+        if (cleanText.startsWith(prompt)) {
+            cleanText = cleanText.substring(prompt.length());
+        }
+        return cleanText.trim();
     }
 
     private GeneratedIdea createMockIdea(ProjectGenerationRequest request) {
@@ -82,12 +156,17 @@ public class HuggingFaceService {
     }
 
     private String buildPrompt(ProjectGenerationRequest request) {
-        return "<s>[INST] You are an expert software architect. " +
+        String prompt = "<s>[INST] You are an expert software architect. " +
                "Generate a highly creative, real-world project idea (e.g., Food Delivery App, AI SaaS, Fintech Dashboard) " +
                "specifically tailored for a " + request.getSkillLevel() + " developer using " + 
                request.getProgrammingLanguage() + " with the " + request.getFramework() + " framework " +
-               "in the " + request.getProjectDomain() + " domain.\n\n" +
-               "CRITICAL: You MUST write your ENTIRE response strictly in ENGLISH ONLY. Do not use Chinese or any other language.\n\n" +
+               "in the " + request.getProjectDomain() + " domain.\n\n";
+               
+        if (request.getPreviousIdeaName() != null && !request.getPreviousIdeaName().trim().isEmpty()) {
+            prompt += "CRITICAL: Do NOT generate the idea named '" + request.getPreviousIdeaName() + "' or anything similar to it. You MUST give a completely new and different idea.\n\n";
+        }
+        
+        prompt += "CRITICAL: You MUST write your ENTIRE response strictly in ENGLISH ONLY. Do not use Chinese or any other language.\n\n" +
                "Please provide a completely unique idea each time. (Request ID: " + java.util.UUID.randomUUID().toString() + ")\n" +
                "Make sure the complexity perfectly matches the '" + request.getSkillLevel() + "' level. " +
                "For the API endpoints, do not just limit it to REST! Depending on what is best for the project and framework, " +
@@ -102,6 +181,8 @@ public class HuggingFaceService {
                "  \"recommendedEndpoints\": [\"String (e.g., REST, GraphQL, or WebSockets)\"],\n" +
                "  \"learningRoadmap\": [\"String (Step-by-step roadmap for this specific framework)\"]\n" +
                "} [/INST]";
+               
+        return prompt;
     }
 
     private GeneratedIdea extractJsonFromResponse(String responseText, String prompt) {

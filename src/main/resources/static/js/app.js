@@ -119,7 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
             skillLevel: document.getElementById('skillLevel').value,
             programmingLanguage: document.getElementById('programmingLanguage').value,
             framework: document.getElementById('framework').value,
-            projectDomain: document.getElementById('projectDomain').value
+            projectDomain: document.getElementById('projectDomain').value,
+            previousIdeaName: window.currentProjectName || null
         };
 
         // UI State
@@ -220,6 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Render Details
     function renderProjectDetails(project, container) {
+        window.currentProjectName = project.projectName;
         const template = document.getElementById('project-details-template').content.cloneNode(true);
         
         // Tags
@@ -238,6 +240,14 @@ document.addEventListener('DOMContentLoaded', () => {
         populateList(template.querySelector('.api-list'), project.recommendedEndpoints);
         populateList(template.querySelector('.roadmap-list'), project.learningRoadmap);
         
+        const roadmapContainer = template.querySelector('.detailed-roadmap-container');
+        const roadmapContent = template.querySelector('.roadmap-content');
+        
+        if (project.detailedRoadmap) {
+            roadmapContainer.classList.remove('hidden');
+            roadmapContent.innerHTML = marked.parse(project.detailedRoadmap);
+        }
+        
         container.innerHTML = '';
         
         // Add action buttons if in result view
@@ -253,6 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
             backBtn.style.width = 'auto';
             backBtn.innerHTML = '<i class="fa-solid fa-arrow-left"></i> Start Over';
             backBtn.onclick = () => {
+                window.currentProjectName = null;
                 container.classList.add('hidden');
                 generateForm.parentElement.classList.remove('hidden');
                 generateForm.reset();
@@ -316,9 +327,69 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             };
 
+            const generateRoadmapBtn = document.createElement('button');
+            generateRoadmapBtn.className = 'btn btn-primary';
+            generateRoadmapBtn.style.width = 'auto';
+            generateRoadmapBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            
+            if (project.detailedRoadmap || !project.id) { // hide if already generated
+                generateRoadmapBtn.style.display = 'none';
+            } else {
+                let roadmapTimeLeft = 10;
+                generateRoadmapBtn.disabled = true;
+                generateRoadmapBtn.style.cursor = 'not-allowed';
+                generateRoadmapBtn.innerHTML = `<i class="fa-solid fa-list-check"></i> Generate Detailed Roadmap (${roadmapTimeLeft}s)`;
+                
+                const roadmapTimerInterval = setInterval(() => {
+                    roadmapTimeLeft--;
+                    if (roadmapTimeLeft > 0) {
+                        generateRoadmapBtn.innerHTML = `<i class="fa-solid fa-list-check"></i> Generate Detailed Roadmap (${roadmapTimeLeft}s)`;
+                    } else {
+                        clearInterval(roadmapTimerInterval);
+                        generateRoadmapBtn.disabled = false;
+                        generateRoadmapBtn.style.cursor = 'pointer';
+                        generateRoadmapBtn.innerHTML = `<i class="fa-solid fa-list-check"></i> Generate Detailed Roadmap`;
+                    }
+                }, 1000);
+            }
+
+            generateRoadmapBtn.onclick = async () => {
+                const originalText = generateRoadmapBtn.innerHTML;
+                generateRoadmapBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+                generateRoadmapBtn.disabled = true;
+                
+                try {
+                    const response = await fetch(`${API_BASE_URL}/${project.id}/roadmap`, {
+                        method: 'POST',
+                        headers: {
+                            'X-Session-Id': sessionId
+                        }
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to generate roadmap');
+                    
+                    const updatedProject = await response.json();
+                    project.detailedRoadmap = updatedProject.detailedRoadmap;
+                    
+                    // Display it
+                    const activeRoadmapContainer = container.querySelector('.detailed-roadmap-container');
+                    const activeRoadmapContent = container.querySelector('.roadmap-content');
+                    activeRoadmapContainer.classList.remove('hidden');
+                    activeRoadmapContent.innerHTML = marked.parse(updatedProject.detailedRoadmap);
+                    
+                    generateRoadmapBtn.style.display = 'none';
+                } catch (error) {
+                    console.error(error);
+                    alert('Error generating roadmap. Please try again later.');
+                    generateRoadmapBtn.innerHTML = originalText;
+                    generateRoadmapBtn.disabled = false;
+                }
+            };
+
             buttonsContainer.appendChild(backBtn);
             buttonsContainer.appendChild(regenerateBtn);
             buttonsContainer.appendChild(downloadPdfBtn);
+            buttonsContainer.appendChild(generateRoadmapBtn);
             template.querySelector('.project-details').prepend(buttonsContainer);
             
             if (!sessionStorage.getItem('duplicateWarningShown')) {

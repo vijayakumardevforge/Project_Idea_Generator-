@@ -49,6 +49,9 @@ public class ProjectIdea {
     @Column(columnDefinition = "jsonb")
     private List<String> learningRoadmap;
 
+    @Column(columnDefinition = "TEXT")
+    private String detailedRoadmap;
+
     private String ipAddress;
 
     @Column(columnDefinition = "TEXT")

@@ -17,4 +17,6 @@ public class ProjectGenerationRequest {
 
     @NotBlank(message = "Project domain is required")
     private String projectDomain;
+    
+    private String previousIdeaName;
 }
