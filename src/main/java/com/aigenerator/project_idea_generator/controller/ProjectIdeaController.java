@@ -17,10 +17,14 @@ public class ProjectIdeaController {
 
     private final ProjectIdeaService service;
     private final com.aigenerator.project_idea_generator.service.HistoryService historyService;
+    private final com.aigenerator.project_idea_generator.repository.UserRepository userRepository;
+    private final com.aigenerator.project_idea_generator.repository.ProjectIdeaRepository ideaRepository;
 
-    public ProjectIdeaController(ProjectIdeaService service, com.aigenerator.project_idea_generator.service.HistoryService historyService) {
+    public ProjectIdeaController(ProjectIdeaService service, com.aigenerator.project_idea_generator.service.HistoryService historyService, com.aigenerator.project_idea_generator.repository.UserRepository userRepository, com.aigenerator.project_idea_generator.repository.ProjectIdeaRepository ideaRepository) {
         this.service = service;
         this.historyService = historyService;
+        this.userRepository = userRepository;
+        this.ideaRepository = ideaRepository;
     }
 
     @PostMapping("/generate")
@@ -77,5 +81,41 @@ public class ProjectIdeaController {
     @PostMapping("/{id}/roadmap")
     public ResponseEntity<ProjectIdea> generateRoadmap(@PathVariable Long id) {
         return ResponseEntity.ok(service.generateAndSaveRoadmap(id));
+    }
+
+    @PostMapping("/{id}/save")
+    public ResponseEntity<?> saveIdeaForUser(@PathVariable Long id, org.springframework.security.core.Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).body(java.util.Map.of("message", "Unauthorized"));
+        }
+        
+        java.util.Optional<com.aigenerator.project_idea_generator.model.User> userOpt = userRepository.findByEmail(authentication.getName());
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(401).body(java.util.Map.of("message", "User not found"));
+        }
+
+        ProjectIdea idea = service.getProjectById(id);
+        idea.setUser(userOpt.get());
+        ideaRepository.save(idea);
+
+        return ResponseEntity.ok(java.util.Map.of("message", "Idea saved successfully"));
+    }
+
+    @GetMapping("/saved")
+    public ResponseEntity<?> getSavedIdeas(org.springframework.security.core.Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(401).body(java.util.Map.of("message", "Unauthorized"));
+        }
+
+        java.util.Optional<com.aigenerator.project_idea_generator.model.User> userOpt = userRepository.findByEmail(authentication.getName());
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(401).body(java.util.Map.of("message", "User not found"));
+        }
+
+        List<ProjectIdea> savedIdeas = ideaRepository.findByUserOrderByCreatedAtDesc(userOpt.get());
+        if (savedIdeas.isEmpty()) {
+            return ResponseEntity.ok(java.util.Map.of("message", "no history"));
+        }
+        return ResponseEntity.ok(savedIdeas);
     }
 }

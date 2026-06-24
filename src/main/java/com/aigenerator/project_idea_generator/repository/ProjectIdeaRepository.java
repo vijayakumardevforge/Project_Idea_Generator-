@@ -18,4 +18,6 @@ public interface ProjectIdeaRepository extends JpaRepository<ProjectIdea, Long> 
 
     @Query("SELECT COUNT(DISTINCT p.ipAddress) FROM ProjectIdea p WHERE p.createdAt >= :date")
     long countDistinctUsersToday(@Param("date") LocalDateTime date);
+
+    List<ProjectIdea> findByUserOrderByCreatedAtDesc(com.aigenerator.project_idea_generator.model.User user);
 }

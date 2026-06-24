@@ -1,51 +1,64 @@
 package com.aigenerator.project_idea_generator.config;
 
+import com.aigenerator.project_idea_generator.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final CustomUserDetailsService userDetailsService;
+
+    public SecurityConfig(CustomUserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> cors.configurationSource(request -> {
+                CorsConfiguration config = new CorsConfiguration();
+                config.setAllowedOrigins(List.of("*"));
+                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                config.setAllowedHeaders(List.of("*"));
+                return config;
+            }))
             .csrf(csrf -> csrf.disable()) // Disable CSRF for simplified API usage
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .anyRequest().permitAll()
+                .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/api/auth/**", "/api/projects/generate", "/api/projects/history").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/index.html", "/admin.html", "/").permitAll()
+                .anyRequest().permitAll() // In a real app we might secure /api/projects/save, but we'll check user inside controller
             )
-            .httpBasic(basic -> basic.authenticationEntryPoint((request, response, authException) -> 
-                response.sendError(401, "Unauthorized")
-            ));
+            .httpBasic(basic -> basic.authenticationEntryPoint((request, response, authException) -> {
+                response.sendError(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            }));
+            
         return http.build();
     }
 
-    @org.springframework.beans.factory.annotation.Value("${admin.username:admin}")
-    private String adminUsername;
-
-    @org.springframework.beans.factory.annotation.Value("${admin.password:password}")
-    private String adminPassword;
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
 
     @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-        UserDetails admin = User.builder()
-            .username(adminUsername)
-            .password(passwordEncoder.encode(adminPassword))
-            .roles("ADMIN")
-            .build();
-        
-        return new InMemoryUserDetailsManager(admin);
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 
     @Bean

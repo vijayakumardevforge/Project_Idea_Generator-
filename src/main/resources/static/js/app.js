@@ -83,6 +83,164 @@ document.addEventListener('DOMContentLoaded', () => {
         updateFrameworks();
     }
 
+    // --- Authentication State & Logic ---
+    let currentUser = null;
+
+    async function checkAuthStatus() {
+        try {
+            const res = await fetch('/api/auth/me');
+            if (res.ok) {
+                currentUser = await res.json();
+            } else {
+                currentUser = null;
+            }
+        } catch (e) {
+            currentUser = null;
+        }
+        updateNavUI();
+        
+        // Handle pending save idea after login
+        const pendingSave = sessionStorage.getItem('pendingSaveIdeaId');
+        if (currentUser && pendingSave) {
+            sessionStorage.removeItem('pendingSaveIdeaId');
+            saveIdea(pendingSave);
+        }
+    }
+
+    function updateNavUI() {
+        const loginNav = document.getElementById('nav-login');
+        const profileNav = document.getElementById('nav-profile');
+        const adminNav = document.getElementById('nav-admin');
+        const logoutNav = document.getElementById('nav-logout');
+
+        if (currentUser) {
+            loginNav.classList.add('hidden');
+            profileNav.classList.remove('hidden');
+            logoutNav.classList.remove('hidden');
+            if (currentUser.role === 'ROLE_ADMIN') {
+                adminNav.classList.remove('hidden');
+            } else {
+                adminNav.classList.add('hidden');
+            }
+        } else {
+            loginNav.classList.remove('hidden');
+            profileNav.classList.add('hidden');
+            logoutNav.classList.add('hidden');
+            adminNav.classList.add('hidden');
+        }
+    }
+
+    checkAuthStatus();
+
+    // Login/Register Form Switching
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const authError = document.getElementById('auth-error');
+
+    document.getElementById('show-register').addEventListener('click', (e) => {
+        e.preventDefault();
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+        authError.classList.add('hidden');
+    });
+
+    document.getElementById('show-login').addEventListener('click', (e) => {
+        e.preventDefault();
+        registerForm.classList.add('hidden');
+        loginForm.classList.remove('hidden');
+        authError.classList.add('hidden');
+    });
+
+    // Auth Form Submissions
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                authError.classList.add('hidden');
+                loginForm.reset();
+                await checkAuthStatus();
+                // Redirect logic
+                const pendingSave = sessionStorage.getItem('pendingSaveIdeaId');
+                if (!pendingSave) {
+                    navigateToPage('generate');
+                }
+            } else {
+                authError.textContent = data.message || 'Login failed';
+                authError.classList.remove('hidden');
+            }
+        } catch (error) {
+            authError.textContent = 'Network error during login';
+            authError.classList.remove('hidden');
+        }
+    });
+
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('register-email').value;
+        const password = document.getElementById('register-password').value;
+        
+        try {
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                authError.classList.add('hidden');
+                registerForm.reset();
+                // Show login form after registration
+                registerForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+                alert('Registration successful! Please login.');
+            } else {
+                authError.textContent = data.message || 'Registration failed';
+                authError.classList.remove('hidden');
+            }
+        } catch (error) {
+            authError.textContent = 'Network error during registration';
+            authError.classList.remove('hidden');
+        }
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', async (e) => {
+        e.preventDefault();
+        await fetch('/api/auth/logout', { method: 'POST' });
+        currentUser = null;
+        updateNavUI();
+        navigateToPage('generate');
+    });
+
+    function navigateToPage(targetPage) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const targetLink = document.querySelector(`[data-page="${targetPage}"]`);
+        if (targetLink) targetLink.classList.add('active');
+        
+        views.forEach(view => {
+            view.classList.remove('active');
+            if (view.id === `${targetPage}-view`) {
+                view.classList.add('active');
+            }
+        });
+
+        if (targetPage === 'history') {
+            loadHistory();
+        } else if (targetPage === 'profile') {
+            loadProfile();
+        }
+    }
+
     // Navigation Logic
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
@@ -92,22 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!targetPage) return;
             
             e.preventDefault();
-            
-            // Update active link
-            navLinks.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-            
-            // Show target view
-            views.forEach(view => {
-                view.classList.remove('active');
-                if (view.id === `${targetPage}-view`) {
-                    view.classList.add('active');
-                }
-            });
-
-            if (targetPage === 'history') {
-                loadHistory();
-            }
+            navigateToPage(targetPage);
         });
     });
 
@@ -219,6 +362,55 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Load Profile Saved Ideas
+    async function loadProfile() {
+        const profileGrid = document.getElementById('profile-grid');
+        const profileLoading = document.getElementById('profile-loading');
+        
+        profileGrid.innerHTML = '';
+        profileLoading.classList.remove('hidden');
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/saved`);
+            if (!response.ok) throw new Error('Failed to fetch saved ideas');
+
+            const data = await response.json();
+            profileLoading.classList.add('hidden');
+
+            if (data.message === "no history" || data.length === 0) {
+                profileGrid.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1;">You have no saved ideas yet.</p>';
+                return;
+            }
+
+            const projects = Array.isArray(data) ? data : (data.data || []);
+            
+            projects.forEach(project => {
+                const card = createHistoryCard(project);
+                profileGrid.appendChild(card);
+            });
+            
+        } catch (error) {
+            console.error(error);
+            profileLoading.innerHTML = '<p style="color: #ef4444;">Failed to load saved ideas.</p>';
+        }
+    }
+    
+    // Save Idea functionality
+    async function saveIdea(projectId) {
+        try {
+            const res = await fetch(`${API_BASE_URL}/${projectId}/save`, { method: 'POST' });
+            if (res.ok) {
+                alert('Idea saved successfully!');
+                navigateToPage('profile');
+            } else {
+                alert('Failed to save idea. Please try again.');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error saving idea.');
+        }
+    }
+
     // Render Details
     function renderProjectDetails(project, container) {
         window.currentProjectName = project.projectName;
@@ -245,7 +437,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (project.detailedRoadmap) {
             roadmapContainer.classList.remove('hidden');
-            roadmapContent.innerHTML = marked.parse(project.detailedRoadmap);
+            let cleanedRoadmap = project.detailedRoadmap.replace(/■ /g, '').replace(/\[ \] /g, '').replace(/\[x\] /gi, '');
+            roadmapContent.innerHTML = marked.parse(cleanedRoadmap);
         }
         
         container.innerHTML = '';
@@ -375,9 +568,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     const activeRoadmapContainer = container.querySelector('.detailed-roadmap-container');
                     const activeRoadmapContent = container.querySelector('.roadmap-content');
                     activeRoadmapContainer.classList.remove('hidden');
-                    activeRoadmapContent.innerHTML = marked.parse(updatedProject.detailedRoadmap);
+                    
+                    let cleanedDynamicRoadmap = updatedProject.detailedRoadmap.replace(/■ /g, '').replace(/\[ \] /g, '').replace(/\[x\] /gi, '');
+                    activeRoadmapContent.innerHTML = marked.parse(cleanedDynamicRoadmap);
                     
                     generateRoadmapBtn.style.display = 'none';
+                    
+                    // Automatically scroll to the roadmap
+                    activeRoadmapContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 } catch (error) {
                     console.error(error);
                     alert('Error generating roadmap. Please try again later.');
@@ -386,10 +584,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             };
 
+            const saveIdeaBtn = document.createElement('button');
+            saveIdeaBtn.className = 'btn btn-primary';
+            saveIdeaBtn.style.width = 'auto';
+            saveIdeaBtn.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+            saveIdeaBtn.innerHTML = '<i class="fa-solid fa-bookmark"></i> Save Idea';
+            
+            if (!project.id) {
+                saveIdeaBtn.style.display = 'none';
+            }
+            
+            saveIdeaBtn.onclick = () => {
+                if (currentUser) {
+                    saveIdea(project.id);
+                } else {
+                    sessionStorage.setItem('pendingSaveIdeaId', project.id);
+                    navigateToPage('login');
+                }
+            };
+
             buttonsContainer.appendChild(backBtn);
             buttonsContainer.appendChild(regenerateBtn);
             buttonsContainer.appendChild(downloadPdfBtn);
             buttonsContainer.appendChild(generateRoadmapBtn);
+            buttonsContainer.appendChild(saveIdeaBtn);
             template.querySelector('.project-details').prepend(buttonsContainer);
             
             if (!sessionStorage.getItem('duplicateWarningShown')) {

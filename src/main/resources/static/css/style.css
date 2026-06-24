@@ -456,6 +456,17 @@ select option {
     color: var(--secondary);
 }
 
+/* Roadmap Markdown Styles */
+.roadmap-content input[type="checkbox"] {
+    display: none !important;
+}
+.roadmap-content li.task-list-item {
+    list-style-type: disc; /* Re-enable standard bullets since we hide the checkbox */
+}
+.roadmap-content li {
+    margin-bottom: 0.5rem;
+}
+
 /* History Grid */
 .history-grid {
     display: grid;
