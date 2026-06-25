@@ -8,8 +8,10 @@ A smart, AI-powered web application that generates custom software project ideas
 
 - **Personalized Ideas:** Generates projects based on user inputs (Domain, Language, Framework, Skill Level).
 - **Comprehensive Details:** Provides key features, suggested database tables, recommended endpoints, and a learning roadmap.
+- **Native PDF Export:** Export generated ideas to high-quality, vector-based PDFs with crisp, selectable text and automatically formatted Markdown headers.
 - **AI Integration:** Powered by Hugging Face's API (Qwen/Qwen2.5-7B-Instruct).
-- **Responsive UI:** Clean, modern frontend built with HTML, CSS, and Vanilla JavaScript.
+- **Responsive UI:** Clean, modern frontend built with HTML, CSS, and Vanilla JavaScript, featuring a fully mobile-optimized, dynamic Grid layout.
+- **Custom Branding:** Polished visual experience including a custom SVG gradient favicon.
 - **Robust Backend:** Built with Spring Boot and Java 21.
 - **Security Features:** Tracks failed login attempts to prevent brute-force attacks and utilizes secure database connection practices with Supabase.
 - **Data Persistence:** Uses PostgreSQL to manage permanent application data.
