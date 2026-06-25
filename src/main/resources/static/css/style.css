@@ -683,6 +683,44 @@ select option {
     }
 }
 
+/* Action Buttons Container (Responsive) */
+.action-buttons-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.action-buttons-container .action-btn {
+    width: auto;
+    flex: 0 1 auto;
+}
+
+@media (max-width: 600px) {
+    .action-buttons-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+    .action-buttons-container .action-btn {
+        width: 100%;
+        margin-bottom: 0;
+        padding: 0.5rem 0.4rem;
+        font-size: 0.75rem;
+        text-align: center;
+        /* Ensure content inside stretches and centers perfectly */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        gap: 0.4rem; /* Shrink gap between icon and text */
+    }
+    .action-buttons-container .action-btn:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+    }
+}
 @media (max-width: 480px) {
     .sidebar-link {
         flex: 1 1 100%;

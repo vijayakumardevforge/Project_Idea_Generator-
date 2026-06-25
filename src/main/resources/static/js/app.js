@@ -446,14 +446,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add action buttons if in result view
         if (container.id === 'result-container') {
             const buttonsContainer = document.createElement('div');
-            buttonsContainer.style.display = 'flex';
-            buttonsContainer.style.gap = '1rem';
-            buttonsContainer.style.marginBottom = '2rem';
-            buttonsContainer.style.flexWrap = 'wrap';
+            buttonsContainer.className = 'action-buttons-container';
 
             const backBtn = document.createElement('button');
-            backBtn.className = 'btn btn-secondary';
-            backBtn.style.width = 'auto';
+            backBtn.className = 'btn btn-secondary action-btn';
             backBtn.innerHTML = '<i class="fa-solid fa-arrow-left"></i> Start Over';
             backBtn.onclick = () => {
                 window.currentProjectName = null;
@@ -466,8 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             const regenerateBtn = document.createElement('button');
-            regenerateBtn.className = 'btn btn-primary';
-            regenerateBtn.style.width = 'auto';
+            regenerateBtn.className = 'btn btn-primary action-btn';
             
             let timeLeft = 10;
             regenerateBtn.disabled = true;
@@ -493,36 +488,150 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             const downloadPdfBtn = document.createElement('button');
-            downloadPdfBtn.className = 'btn btn-secondary';
-            downloadPdfBtn.style.width = 'auto';
+            downloadPdfBtn.className = 'btn btn-secondary action-btn';
             downloadPdfBtn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Download PDF';
             downloadPdfBtn.onclick = () => {
-                const element = document.querySelector('.project-details');
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
                 
-                // Configure PDF options
-                const opt = {
-                    margin:       [0.5, 0.5], // 0.5 inch margins
-                    filename:     `${project.projectName.replace(/[^a-zA-Z0-9]/g, '_')}_Idea.pdf`,
-                    image:        { type: 'jpeg', quality: 1.0 },
-                    html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-                    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+                let yPos = 20;
+                const margin = 20;
+                const pageWidth = doc.internal.pageSize.width;
+                const maxLineWidth = pageWidth - margin * 2;
+                
+                // Title
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(22);
+                doc.setTextColor(30, 64, 175); // A nice blue for title
+                
+                const splitTitle = doc.splitTextToSize(project.projectName, maxLineWidth);
+                doc.text(splitTitle, margin, yPos);
+                yPos += (splitTitle.length * 10) + 5;
+                
+                // Tags
+                doc.setFont("helvetica", "italic");
+                doc.setFontSize(10);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`${project.skillLevel} | ${project.programmingLanguage} | ${project.framework} | ${project.projectDomain}`, margin, yPos);
+                yPos += 15;
+                
+                // Description
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(12);
+                doc.setTextColor(50, 50, 50);
+                const splitDesc = doc.splitTextToSize(project.projectDescription, maxLineWidth);
+                doc.text(splitDesc, margin, yPos);
+                yPos += (splitDesc.length * 6) + 10;
+                
+                const addSection = (title, items) => {
+                    if (yPos > 270) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+                    doc.setFontSize(14);
+                    doc.setFont("helvetica", "bold");
+                    doc.setTextColor(30, 64, 175);
+                    doc.text(title, margin, yPos);
+                    yPos += 8;
+                    
+                    doc.setFontSize(11);
+                    doc.setFont("helvetica", "normal");
+                    doc.setTextColor(50, 50, 50);
+                    
+                    if (!items || items.length === 0) {
+                        doc.text("- Not specified", margin + 5, yPos);
+                        yPos += 8;
+                    } else {
+                        items.forEach(item => {
+                            const splitItem = doc.splitTextToSize(`• ${item}`, maxLineWidth - 5);
+                            if (yPos + (splitItem.length * 5) > 280) {
+                                doc.addPage();
+                                yPos = 20;
+                            }
+                            doc.text(splitItem, margin + 5, yPos);
+                            yPos += (splitItem.length * 5) + 2;
+                        });
+                    }
+                    yPos += 5;
                 };
-                
-                // Hide buttons before PDF generation and add PDF specific styling class
-                buttonsContainer.style.display = 'none';
-                element.classList.add('pdf-export');
-                
-                html2pdf().set(opt).from(element).save().then(() => {
-                    // Revert UI changes after generation
-                    buttonsContainer.style.display = 'flex';
-                    element.classList.remove('pdf-export');
-                });
+
+                addSection("Key Features", project.keyFeatures);
+                addSection("Suggested Tables", project.suggestedTables);
+                addSection("Key APIs / Endpoints", project.recommendedEndpoints);
+                addSection("Learning Roadmap", project.learningRoadmap);
+
+                if (project.detailedRoadmap) {
+                    if (yPos > 250) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+                    doc.setFontSize(14);
+                    doc.setFont("helvetica", "bold");
+                    doc.setTextColor(30, 64, 175);
+                    doc.text("Step-by-Step Implementation Plan", margin, yPos);
+                    yPos += 8;
+                    
+                    doc.setFontSize(11);
+                    doc.setFont("helvetica", "normal");
+                    doc.setTextColor(50, 50, 50);
+                    
+                    let cleanedText = project.detailedRoadmap.replace(/■ /g, '').replace(/\[ \] /g, '').replace(/\[x\] /gi, '');
+                    const lines = cleanedText.split('\n');
+                    
+                    lines.forEach(line => {
+                        if (line.trim() === '') {
+                            yPos += 3;
+                            return;
+                        }
+                        
+                        // Handle Markdown Headers
+                        let isHeader = false;
+                        let textToPrint = line;
+                        
+                        if (line.startsWith('### ')) {
+                            doc.setFont("helvetica", "bold");
+                            doc.setFontSize(11);
+                            doc.setTextColor(40, 40, 40);
+                            textToPrint = line.substring(4);
+                            isHeader = true;
+                            yPos += 3;
+                        } else if (line.startsWith('## ')) {
+                            doc.setFont("helvetica", "bold");
+                            doc.setFontSize(12);
+                            doc.setTextColor(30, 64, 175);
+                            textToPrint = line.substring(3);
+                            isHeader = true;
+                            yPos += 4;
+                        } else if (line.startsWith('# ')) {
+                            doc.setFont("helvetica", "bold");
+                            doc.setFontSize(13);
+                            doc.setTextColor(30, 64, 175);
+                            textToPrint = line.substring(2);
+                            isHeader = true;
+                            yPos += 5;
+                        } else {
+                            doc.setFont("helvetica", "normal");
+                            doc.setFontSize(11);
+                            doc.setTextColor(50, 50, 50);
+                            // Also handle bold markdown **text** naively if needed, but for now just strip **
+                            textToPrint = textToPrint.replace(/\*\*/g, '');
+                        }
+
+                        const splitLine = doc.splitTextToSize(textToPrint, maxLineWidth);
+                        if (yPos + (splitLine.length * 5) > 280) {
+                            doc.addPage();
+                            yPos = 20;
+                        }
+                        doc.text(splitLine, margin, yPos);
+                        yPos += (splitLine.length * 5) + (isHeader ? 2 : 1);
+                    });
+                }
+
+                doc.save(`${project.projectName.replace(/[^a-zA-Z0-9]/g, '_')}_Idea.pdf`);
             };
 
             const generateRoadmapBtn = document.createElement('button');
-            generateRoadmapBtn.className = 'btn btn-primary';
-            generateRoadmapBtn.style.width = 'auto';
+            generateRoadmapBtn.className = 'btn btn-primary action-btn';
             generateRoadmapBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
             
             if (project.detailedRoadmap || !project.id) { // hide if already generated
@@ -585,8 +694,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             const saveIdeaBtn = document.createElement('button');
-            saveIdeaBtn.className = 'btn btn-primary';
-            saveIdeaBtn.style.width = 'auto';
+            saveIdeaBtn.className = 'btn btn-primary action-btn';
             saveIdeaBtn.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
             saveIdeaBtn.innerHTML = '<i class="fa-solid fa-bookmark"></i> Save Idea';
             
