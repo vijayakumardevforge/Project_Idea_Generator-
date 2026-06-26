@@ -711,9 +711,54 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             };
 
+            const copyIdeaBtn = document.createElement('button');
+            copyIdeaBtn.className = 'btn btn-secondary action-btn';
+            copyIdeaBtn.innerHTML = '<i class="fa-solid fa-copy"></i> Copy Idea';
+            copyIdeaBtn.onclick = () => {
+                let textToCopy = `Project Idea: ${project.projectName}\n` +
+                    `Description: ${project.projectDescription}\n` +
+                    `Stack: ${project.skillLevel} | ${project.programmingLanguage} | ${project.framework} | ${project.projectDomain}\n\n` +
+                    `Key Features:\n${(project.keyFeatures || []).map(f => `- ${f}`).join('\n')}\n\n` +
+                    `Suggested Tables:\n${(project.suggestedTables || []).map(t => `- ${t}`).join('\n')}\n\n` +
+                    `Key APIs:\n${(project.recommendedEndpoints || []).map(a => `- ${a}`).join('\n')}\n\n` +
+                    `Learning Roadmap:\n${(project.learningRoadmap || []).map(r => `- ${r}`).join('\n')}`;
+                    
+                if (project.detailedRoadmap) {
+                    textToCopy += `\n\nStep-by-Step Implementation Plan:\n${project.detailedRoadmap.replace(/■ /g, '').replace(/\[ \] /g, '').replace(/\[x\] /gi, '')}`;
+                }
+                    
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const originalHtml = copyIdeaBtn.innerHTML;
+                    copyIdeaBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+                    setTimeout(() => copyIdeaBtn.innerHTML = originalHtml, 2000);
+                }).catch(err => {
+                    console.error('Could not copy text: ', err);
+                    alert('Failed to copy to clipboard.');
+                });
+            };
+
+            const shareIdeaBtn = document.createElement('button');
+            shareIdeaBtn.className = 'btn btn-secondary action-btn';
+            shareIdeaBtn.innerHTML = '<i class="fa-solid fa-share-nodes"></i> Share';
+            shareIdeaBtn.onclick = () => {
+                const shareText = `Check out this awesome project idea: ${project.projectName} - ${project.projectDescription}\n\nGenerated with AI Project Idea Generator!`;
+                if (navigator.share) {
+                    navigator.share({
+                        title: project.projectName,
+                        text: shareText,
+                        url: window.location.href,
+                    }).catch(console.error);
+                } else {
+                    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+                    window.open(twitterUrl, '_blank');
+                }
+            };
+
             buttonsContainer.appendChild(backBtn);
             buttonsContainer.appendChild(regenerateBtn);
             buttonsContainer.appendChild(downloadPdfBtn);
+            buttonsContainer.appendChild(copyIdeaBtn);
+            buttonsContainer.appendChild(shareIdeaBtn);
             buttonsContainer.appendChild(generateRoadmapBtn);
             buttonsContainer.appendChild(saveIdeaBtn);
             template.querySelector('.project-details').prepend(buttonsContainer);
