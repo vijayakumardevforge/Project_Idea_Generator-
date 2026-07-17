@@ -927,4 +927,297 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- Unique First-Time Entrance Portal Animation Logic ---
+    const introPortal = document.getElementById('intro-portal');
+    const skipIntroBtn = document.getElementById('skip-intro-btn');
+    const enterPortalBtn = document.getElementById('enter-portal-btn');
+    const replayIntroLink = document.getElementById('replay-intro-link');
+    const introSteps = [
+        document.getElementById('intro-step-1'),
+        document.getElementById('intro-step-2'),
+        document.getElementById('intro-step-3')
+    ];
+    const introProgressBar = document.getElementById('intro-progress-bar');
+    const introTimerLabel = document.getElementById('intro-timer-label');
+    
+    let introTimeouts = [];
+    let introProgressInterval = null;
+
+    function clearIntroTimers() {
+        introTimeouts.forEach(t => clearTimeout(t));
+        introTimeouts = [];
+        if (introProgressInterval) {
+            clearInterval(introProgressInterval);
+            introProgressInterval = null;
+        }
+    }
+
+    function dismissPortal() {
+        clearIntroTimers();
+        if (!introPortal) return;
+        
+        introPortal.classList.add('portal-dismissing');
+        
+        // Trigger reveal animations on main interface
+        const navbar = document.querySelector('.navbar');
+        const activeView = document.querySelector('.view.active');
+        if (navbar) {
+            navbar.classList.remove('portal-reveal');
+            void navbar.offsetWidth; // trigger reflow
+            navbar.classList.add('portal-reveal');
+        }
+        if (activeView) {
+            activeView.classList.remove('portal-reveal');
+            void activeView.offsetWidth; // trigger reflow
+            activeView.classList.add('portal-reveal');
+        }
+        
+        setTimeout(() => {
+            introPortal.classList.add('hidden');
+            introPortal.classList.remove('portal-dismissing');
+            localStorage.setItem('hasSeenIntro_v2', 'true');
+            
+            // Auto-trigger interactive step-by-step tour for first-time visitors
+            if (!localStorage.getItem('hasSeenTour_v1') && typeof window.openTourModal === 'function') {
+                setTimeout(() => window.openTourModal(0), 600);
+            }
+        }, 750);
+    }
+
+    function playIntroAnimation() {
+        if (!introPortal) return;
+        clearIntroTimers();
+        
+        // Reset state
+        introPortal.classList.remove('hidden');
+        introPortal.classList.remove('portal-dismissing');
+        introSteps.forEach((s, idx) => {
+            if (s) {
+                s.classList.remove('active');
+                if (idx === 0) s.classList.add('active');
+            }
+        });
+        if (introProgressBar) introProgressBar.style.width = '0%';
+        if (introTimerLabel) introTimerLabel.textContent = 'Auto-entering workspace...';
+
+        // Animate progress bar over 6.5 seconds total duration
+        let progress = 0;
+        const durationMs = 6500;
+        const intervalMs = 50;
+        const stepAmount = (intervalMs / durationMs) * 100;
+        
+        introProgressInterval = setInterval(() => {
+            progress += stepAmount;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(introProgressInterval);
+            }
+            if (introProgressBar) introProgressBar.style.width = `${progress}%`;
+        }, intervalMs);
+
+        // Step 2 reveal after 2.0s
+        introTimeouts.push(setTimeout(() => {
+            if (introSteps[0]) introSteps[0].classList.remove('active');
+            if (introSteps[1]) introSteps[1].classList.add('active');
+        }, 2000));
+
+        // Step 3 reveal after 4.0s
+        introTimeouts.push(setTimeout(() => {
+            if (introSteps[1]) introSteps[1].classList.remove('active');
+            if (introSteps[2]) introSteps[2].classList.add('active');
+        }, 4000));
+
+        // Auto dismiss after 6.5s
+        introTimeouts.push(setTimeout(() => {
+            dismissPortal();
+        }, durationMs));
+    }
+
+    if (skipIntroBtn) {
+        skipIntroBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            dismissPortal();
+        });
+    }
+
+    if (enterPortalBtn) {
+        enterPortalBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            dismissPortal();
+        });
+    }
+
+    if (replayIntroLink) {
+        replayIntroLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            playIntroAnimation();
+        });
+    }
+
+    // Check if first-time visitor
+    const hasSeenIntro = localStorage.getItem('hasSeenIntro_v2');
+    if (!hasSeenIntro) {
+        playIntroAnimation();
+    } else if (!localStorage.getItem('hasSeenTour_v1')) {
+        // If they already saw the intro but haven't seen the tour, open it
+        setTimeout(() => window.openTourModal(0), 500);
+    }
+
+    // --- Interactive Step-by-Step Onboarding Walkthrough Tour Logic ---
+    const tourOverlay = document.getElementById('onboarding-tour-overlay');
+    const closeTourBtn = document.querySelector('.close-tour');
+    const tourPrevBtn = document.getElementById('tour-prev-btn');
+    const tourNextBtn = document.getElementById('tour-next-btn');
+    const tourStepIndicator = document.getElementById('tour-step-indicator');
+    const tourTitle = document.getElementById('tour-title');
+    const tourDescription = document.getElementById('tour-description');
+    const tourVisual = document.getElementById('tour-visual');
+    const tourDots = document.querySelectorAll('#tour-dots .tour-dot');
+    const startTourLink = document.getElementById('start-tour-link');
+
+    let currentTourStep = 0;
+    const tourStepsData = [
+        {
+            title: "Welcome to IdeaGen AI 💡",
+            description: "Your personal AI system architect! Whether you are building a portfolio app or enterprise software, our AI designs full project architectures, database schemas, and step-by-step implementation roadmaps tailored precisely to you.",
+            visual: '<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Synthesizing custom software architectures in seconds</span>',
+            spotlight: null
+        },
+        {
+            title: "Step 1: Choose Your Tech Stack 🛠️",
+            description: "Start by picking your desired **Skill Level** (Beginner to Advanced), your preferred **Programming Language** (Java, Python, C#, TS, etc.), and the exact **Framework** you want to use (like Spring Boot or Next.js).",
+            visual: '<i class="fa-solid fa-code"></i> <span>Over 50+ language & framework configurations supported</span>',
+            spotlight: '.form-grid'
+        },
+        {
+            title: "Step 2: Select Your Domain & Spark 🎯",
+            description: "Choose a **Project Domain** like Healthcare, E-Commerce, AI & Machine Learning, or Spring Boot RAG. Then click **Generate Project Idea** to let the AI architect your roadmap!",
+            visual: '<i class="fa-solid fa-bullseye"></i> <span>Tailored domain architectures with custom database schemas</span>',
+            spotlight: '.generate-btn'
+        },
+        {
+            title: "Step 3: Explore Deep Roadmaps & Schemas 📋",
+            description: "Once generated, you get a full architectural blueprint: **Key Features**, **Suggested SQL/NoSQL Tables**, **REST Endpoints**, and a **Dynamic Implementation Roadmap** button that writes a comprehensive step-by-step tutorial!",
+            visual: '<i class="fa-solid fa-list-check"></i> <span>Complete step-by-step markdown plan to build your app</span>',
+            spotlight: '#result-container'
+        },
+        {
+            title: "Step 4: Save, Share & Download PDF 🚀",
+            description: "**Login/Register** to bookmark ideas to your **Profile**. You can also **Download as a clean PDF**, **Copy** to clipboard, or **Share** with teammates. You are all set to start innovating!",
+            visual: '<i class="fa-solid fa-file-pdf"></i> <span>Export your architectural plan instantly and start coding!</span>',
+            spotlight: null
+        }
+    ];
+
+    function clearTourSpotlights() {
+        document.querySelectorAll('.tour-spotlight').forEach(el => el.classList.remove('tour-spotlight'));
+    }
+
+    window.openTourModal = function(stepIndex = 0) {
+        if (!tourOverlay) return;
+        currentTourStep = stepIndex;
+        renderTourStep();
+        tourOverlay.classList.remove('hidden');
+    };
+
+    const tourBody = document.querySelector('.tour-body');
+
+    function renderTourStep() {
+        clearTourSpotlights();
+        const step = tourStepsData[currentTourStep];
+        if (!step) return;
+
+        const updateContent = () => {
+            tourStepIndicator.textContent = `Step ${currentTourStep + 1} of ${tourStepsData.length}`;
+            tourTitle.textContent = step.title;
+            tourDescription.innerHTML = step.description.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            tourVisual.innerHTML = step.visual;
+
+            tourDots.forEach((dot, idx) => {
+                if (idx === currentTourStep) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+
+            if (currentTourStep === 0) {
+                tourPrevBtn.classList.add('hidden');
+            } else {
+                tourPrevBtn.classList.remove('hidden');
+            }
+
+            if (currentTourStep === tourStepsData.length - 1) {
+                tourNextBtn.innerHTML = 'Start Generating! <i class="fa-solid fa-rocket"></i>';
+            } else {
+                tourNextBtn.innerHTML = 'Next Step <i class="fa-solid fa-arrow-right"></i>';
+            }
+
+            if (step.spotlight) {
+                const el = document.querySelector(step.spotlight);
+                if (el && !el.classList.contains('hidden')) {
+                    el.classList.add('tour-spotlight');
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        };
+
+        if (tourBody) {
+            tourBody.classList.remove('tour-step-animate-in');
+            tourBody.classList.add('tour-step-transitioning');
+            setTimeout(() => {
+                updateContent();
+                tourBody.classList.remove('tour-step-transitioning');
+                tourBody.classList.add('tour-step-animate-in');
+            }, 160);
+        } else {
+            updateContent();
+        }
+    }
+
+    function closeTourModal() {
+        clearTourSpotlights();
+        if (tourOverlay) tourOverlay.classList.add('hidden');
+        localStorage.setItem('hasSeenTour_v1', 'true');
+    }
+
+    if (closeTourBtn) closeTourBtn.addEventListener('click', closeTourModal);
+    
+    if (tourNextBtn) {
+        tourNextBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentTourStep < tourStepsData.length - 1) {
+                currentTourStep++;
+                renderTourStep();
+            } else {
+                closeTourModal();
+            }
+        });
+    }
+
+    if (tourPrevBtn) {
+        tourPrevBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentTourStep > 0) {
+                currentTourStep--;
+                renderTourStep();
+            }
+        });
+    }
+
+    tourDots.forEach((dot, idx) => {
+        dot.addEventListener('click', () => {
+            currentTourStep = idx;
+            renderTourStep();
+        });
+    });
+
+    if (startTourLink) {
+        startTourLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.openTourModal(0);
+        });
+    }
+
 });
+

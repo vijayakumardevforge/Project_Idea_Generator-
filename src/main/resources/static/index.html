@@ -17,6 +17,63 @@
         <div class="blob blob-2"></div>
     </div>
 
+    <!-- Unique First-Time Entrance Animation Portal -->
+    <div id="intro-portal" class="intro-portal hidden">
+        <div class="intro-particles-container">
+            <div class="intro-particle p-1"></div>
+            <div class="intro-particle p-2"></div>
+            <div class="intro-particle p-3"></div>
+            <div class="intro-particle p-4"></div>
+            <div class="intro-particle p-5"></div>
+            <div class="intro-particle p-6"></div>
+            <div class="intro-particle p-7"></div>
+            <div class="intro-particle p-8"></div>
+        </div>
+        
+        <div class="intro-bg-grid"></div>
+        <div class="intro-radar-sweep"></div>
+
+        <div class="intro-content">
+            <div class="intro-core-wrapper">
+                <div class="intro-ring ring-outer"></div>
+                <div class="intro-ring ring-middle"></div>
+                <div class="intro-ring ring-inner"></div>
+                <div class="intro-orb">
+                    <i class="fa-solid fa-brain orb-icon"></i>
+                </div>
+                <div class="intro-core-glow"></div>
+            </div>
+
+            <div class="intro-text-sequence">
+                <div id="intro-step-1" class="intro-step active">
+                    <span class="intro-tag"><i class="fa-solid fa-microchip"></i> System Initialization</span>
+                    <h2 class="intro-heading">Waking the AI Neural Core<span class="dot-pulse">...</span></h2>
+                    <p class="intro-subtext">Synthesizing deep technological vectors</p>
+                </div>
+                <div id="intro-step-2" class="intro-step">
+                    <span class="intro-tag"><i class="fa-solid fa-network-wired"></i> Synapses Connected</span>
+                    <h2 class="intro-heading">Architecting Next-Gen Project Roadmaps</h2>
+                    <p class="intro-subtext">Matching algorithms across 50+ languages and frameworks</p>
+                </div>
+                <div id="intro-step-3" class="intro-step">
+                    <div class="intro-brand">
+                        <i class="fa-solid fa-lightbulb gradient-text"></i>
+                        <span class="gradient-text">IdeaGen AI</span>
+                    </div>
+                    <p class="intro-tagline">Spark Your Imagination. Build the Future.</p>
+                    <button id="enter-portal-btn" class="btn btn-primary enter-portal-btn">
+                        Enter Innovation Workspace
+                    </button>
+                </div>
+            </div>
+
+            <div class="intro-progress-bar-container">
+                <div id="intro-progress-bar" class="intro-progress-bar"></div>
+            </div>
+            <div id="intro-timer-label" class="intro-timer-label">Auto-entering workspace...</div>
+        </div>
+    </div>
+
     <nav class="navbar glass">
         <div class="container nav-content">
             <div class="logo">
@@ -30,6 +87,7 @@
                 <li id="nav-profile" class="hidden"><a href="#" data-page="profile"><i class="fa-solid fa-address-card"></i> Profile</a></li>
                 <li id="nav-admin" class="hidden"><a href="admin.html" class="admin-link"><i class="fa-solid fa-lock"></i> Admin</a></li>
                 <li id="nav-logout" class="hidden"><a href="#" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+                <li id="nav-tour"><a href="#" id="start-tour-link" title="Interactive Step-by-Step Guide"><i class="fa-solid fa-compass"></i> Guide</a></li>
             </ul>
         </div>
     </nav>
@@ -266,6 +324,39 @@
             </form>
             <div id="feedback-success" class="hidden" style="color: #10b981; margin-top: 1.5rem; text-align: center; font-weight: 500;">
                 <i class="fa-solid fa-circle-check"></i> Thank you for your feedback!
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Step-by-Step Onboarding Walkthrough Tour -->
+    <div id="onboarding-tour-overlay" class="tour-overlay hidden">
+        <div class="tour-card neon-card fade-in-up">
+            <div class="tour-header">
+                <div class="tour-badge"><i class="fa-solid fa-compass"></i> Interactive Guide</div>
+                <span id="tour-step-indicator" class="tour-step-indicator">Step 1 of 5</span>
+                <span class="close-tour">&times;</span>
+            </div>
+
+            <div class="tour-body">
+                <h2 id="tour-title" class="tour-title">Welcome to IdeaGen AI</h2>
+                <p id="tour-description" class="tour-description">
+                    Your personal AI system architect. Let's take a quick walkthrough of how you can generate full project roadmaps and database schemas.
+                </p>
+                <div id="tour-visual" class="tour-visual"></div>
+            </div>
+
+            <div class="tour-footer">
+                <div class="tour-dots" id="tour-dots">
+                    <span class="tour-dot active" data-step="0"></span>
+                    <span class="tour-dot" data-step="1"></span>
+                    <span class="tour-dot" data-step="2"></span>
+                    <span class="tour-dot" data-step="3"></span>
+                    <span class="tour-dot" data-step="4"></span>
+                </div>
+                <div class="tour-actions">
+                    <button id="tour-prev-btn" class="btn btn-secondary tour-btn hidden"><i class="fa-solid fa-arrow-left"></i> Prev</button>
+                    <button id="tour-next-btn" class="btn btn-primary tour-btn">Next Step <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
             </div>
         </div>
     </div>
