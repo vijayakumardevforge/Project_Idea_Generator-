@@ -1,117 +1,179 @@
-# AI Project Idea Generator
+# 💡 AI Project Idea Generator
 
-[**Live Demo (Render)**](https://project-idea-generator-bvbt.onrender.com/)
+[![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://supabase.com/)
+[![Redis](https://img.shields.io/badge/Redis-Upstash-FF4438?style=for-the-badge&logo=redis&logoColor=white)](https://upstash.com/)
+[![AI Engine](https://img.shields.io/badge/AI%20Model-Qwen%202.5--7B-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://project-idea-generator-bvbt.onrender.com/)
 
-A smart, AI-powered web application that generates custom software project ideas tailored to your skill level, preferred programming language, framework, and domain. It uses the Hugging Face API (Qwen model) to dynamically architect project ideas complete with descriptions, features, database tables, API endpoints, and a step-by-step learning roadmap.
+> **Spark Your Imagination. Build the Future.**  
+> A smart, AI-powered systems architect and roadmap generator that dynamically synthesizes custom software engineering projects tailored to your exact skill level, preferred language, framework, and domain.
 
-## 🚀 Features
+---
 
-- **Personalized Ideas:** Generates projects based on user inputs (Domain, Language, Framework, Skill Level).
-- **Comprehensive Details:** Provides key features, suggested database tables, recommended endpoints, and a learning roadmap.
-- **Native PDF Export:** Export generated ideas to high-quality, vector-based PDFs with crisp, selectable text and automatically formatted Markdown headers.
-- **AI Integration:** Powered by Hugging Face's API (Qwen/Qwen2.5-7B-Instruct).
-- **Responsive UI:** Clean, modern frontend built with HTML, CSS, and Vanilla JavaScript, featuring a fully mobile-optimized, dynamic Grid layout.
-- **Custom Branding:** Polished visual experience including a custom SVG gradient favicon.
-- **Robust Backend:** Built with Spring Boot and Java 21.
-- **Security Features:** Tracks failed login attempts to prevent brute-force attacks and utilizes secure database connection practices with Supabase.
-- **Data Persistence:** Uses PostgreSQL to manage permanent application data.
-- **Session History:** Fast, temporary user history tracking utilizing Redis caching.
+## 🌟 Live Demo
+
+Experience the full application live in production:  
+👉 **[https://project-idea-generator-bvbt.onrender.com/](https://project-idea-generator-bvbt.onrender.com/)**
+
+---
+
+## 📑 Table of Contents
+
+- [Overview](#-overview)
+- [System Architecture](#-system-architecture)
+- [Key Features](#-key-features)
+- [Tech Stack](#️-tech-stack)
+- [API Reference](#-api-reference)
+- [Setup & Installation](#-setup--installation)
+- [Cloud Deployment](#-cloud-deployment)
+
+---
+
+## 🔬 Overview
+
+**AI Project Idea Generator** acts as your personal Senior Technical Project Manager. Powered by Hugging Face's `Qwen/Qwen2.5-7B-Instruct` large language model, it architects production-grade project specifications complete with:
+- **Tailored Descriptions & Features** matched to your domain (`E-Commerce`, `Fintech`, `AI/ML`, etc.).
+- **Relational Database Schemas** with suggested tables and columns.
+- **API Architectural Blueprints** recommending optimal communication patterns (`REST`, `GraphQL`, `WebSockets`).
+- **Phased Sprint Roadmaps** providing actionable step-by-step milestones.
+
+---
+
+## 🏗️ System Architecture
+
+The application is built on a modern decoupled architecture, combining a responsive Vanilla JS/Glassmorphism frontend with a Spring Boot 4 / Java 21 backend, distributed across specialized cloud storage providers:
+
+```mermaid
+flowchart TB
+    subgraph Client ["🖥️ Client Layer"]
+        UI["Web Browser (HTML5 / CSS3 / JS)"]
+        PDF["Client-Side PDF Engine (jsPDF + Marked)"]
+    end
+
+    subgraph CloudAPI ["☁️ Render Cloud API"]
+        API["Spring Boot 4.1.0 Backend API (Java 21)"]
+        SEC["Spring Security & Brute-Force Listener"]
+    end
+
+    subgraph Storage ["💾 Data & Cache Layer"]
+        Redis["Upstash Redis Cache (Session History / 24h TTL)"]
+        Postgres["Supabase Managed PostgreSQL (JSONB Entity Storage)"]
+    end
+
+    subgraph AI ["🧠 Hugging Face API"]
+        Qwen["Qwen 2.5-7B-Instruct (JSON & Roadmap Synthesis)"]
+    end
+
+    UI -->|"REST API / JSON"| API
+    API -->|"REST API / JSON"| UI
+    UI -->|"Render Vector PDF"| PDF
+    API -->|"Authenticate & Audit"| SEC
+    API -->|"Session History (List Ops)"| Redis
+    Redis -->|"Cached Ideas"| API
+    API -->|"JPA / Hibernate"| Postgres
+    Postgres -->|"Entity Data"| API
+    API -->|"Bearer Token / Prompts"| Qwen
+    Qwen -->|"Architectural Output"| API
+```
+
+### ⚙️ How It Works:
+1. **Request Flow:** The frontend submits user preferences (`Skill Level`, `Language`, `Framework`, `Domain`) with custom headers forcing zero-cache fresh synthesis (`x-use-cache: 0`).
+2. **Resilient AI Inference:** The backend communicates with Hugging Face using a 3-attempt exponential retry loop with automatic mock fallback capabilities.
+3. **Dual-Layer Persistence:** Transient session histories are stored in **Upstash Redis** (in-memory, 24h TTL), while user favorites and security logs are permanently saved in **Supabase PostgreSQL** using native `JSONB` columns.
+4. **Brute-Force Shield:** `AuthenticationFailureListener` monitors failed login attempts in real time, extracting client IPs (`X-Forwarded-For`) to prevent brute-force attacks.
+
+---
+
+## ✨ Key Features
+
+- **🧠 Dynamic AI Architecting:** Generates customized project structures based on your skill level (`Beginner`, `Intermediate`, `Advanced`).
+- **🗺️ Interactive Roadmaps & PDF Export:** Synthesizes deep, multi-sprint implementation plans and allows native client-side vector PDF export via `jsPDF` and `Marked`.
+- **🎨 Cyberpunk Glassmorphism UI:** Features an animated neural wake-up portal, radar sweeps, interactive onboarding walkthrough guide, and a floating feedback modal.
+- **🔐 Enterprise Security:** Integrates `BCrypt` hashing, session authentication, and automated IP tracking for failed login attempts.
+- **📊 Role-Protected Admin Dashboard:** Real-time statistics (`Users Today`, `Ideas Today`), feedback reviews, and security audit logs accessible via `/admin.html`.
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Backend:** Java 21, Spring Boot 4.1.0, Spring Data JPA
-- **Frontend:** HTML5, CSS3, JavaScript
-- **Database:** PostgreSQL
-- **Cache:** Redis (Upstash)
-- **AI Provider:** Hugging Face API
-- **Build Tool:** Maven
-- **Utilities:** Lombok, Jackson
+| Layer | Technologies | Key Role |
+| :--- | :--- | :--- |
+| **Backend Core** | **Java 21**, **Spring Boot 4.1.0** | High-performance REST server & DI framework |
+| **Data Access** | **Spring Data JPA**, **Hibernate ORM 6** | Entity mapping and native `JSONB` type handling |
+| **Security** | **Spring Security 6**, **BCrypt** | Authentication, CORS rules, and brute-force event listener |
+| **Database** | **PostgreSQL (Supabase)** | Managed relational database with connection pooling |
+| **Caching** | **Redis (Upstash)** | Distributed serverless session history (`history:session:*`) |
+| **AI Integration** | **Spring RestClient**, **Jackson** | HTTP communication with Hugging Face (`Qwen 2.5-7B`) |
+| **Frontend UI** | **HTML5**, **CSS3**, **Vanilla JS** | Mobile-responsive Grid layout with Glassmorphism animations |
 
-## 📋 Prerequisites
+---
 
-Before running the application, ensure you have the following installed:
+## 🔌 API Reference
 
-- **Java 21** or higher
-- **Maven**
-- **PostgreSQL** (running on default port `5432` or cloud)
-- **Redis** (running on default port `6379` or Upstash)
-- **Hugging Face API Token** (You can get one for free at [huggingface.co](https://huggingface.co/settings/tokens))
+| HTTP Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/projects/generate` | Generates a new project architecture via Hugging Face | Optional (`X-Session-Id`) |
+| `GET` | `/api/projects/history` | Retrieves temporary session history from Redis cache | Optional (`X-Session-Id`) |
+| `POST` | `/api/projects/{id}/roadmap` | Triggers generation of a detailed multi-sprint roadmap | Public |
+| `POST` | `/api/projects/{id}/save` | Permanently saves a project idea to the authenticated user | Yes |
+| `POST` | `/api/auth/login` | Authenticates user credentials and initializes `HttpSession` | No |
+| `GET` | `/api/admin/stats` | Returns system analytics (`totalUsersToday`, `totalIdeasToday`) | `ROLE_ADMIN` |
+
+---
 
 ## ⚙️ Setup & Installation
 
-### 1. Database Configuration
-Create a new PostgreSQL database named `aiprojects`:
+### 1. Prerequisites
+- **Java JDK 21+** and **Maven** (`./mvnw` wrapper included)
+- **PostgreSQL** and **Redis** (local or cloud instances)
+- **Hugging Face API Token** (free at [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens))
+
+### 2. Database & Environment Configuration
+Create a PostgreSQL database named `aiprojects`:
 ```sql
 CREATE DATABASE aiprojects;
 ```
-Ensure your database credentials in `src/main/resources/application.properties` match your local PostgreSQL setup:
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/aiprojects
-spring.datasource.username=postgres
-spring.datasource.password=1234
-```
 
-### 2. Environment Variables
-The application requires a Hugging Face API token to function. You must set this as an environment variable before starting the app.
+Set your environment variables in your terminal:
 
-**Windows (Command Prompt):**
-```cmd
-set HUGGINGFACE_API_TOKEN=your_token_here
-```
-
-**Windows (PowerShell):**
+**Windows (CMD / PowerShell):**
 ```powershell
-$env:HUGGINGFACE_API_TOKEN="your_token_here"
+$env:HUGGINGFACE_API_TOKEN="your_huggingface_token_here"
 ```
 
 **Linux / macOS:**
 ```bash
-export HUGGINGFACE_API_TOKEN="your_token_here"
+export HUGGINGFACE_API_TOKEN="your_huggingface_token_here"
 export REDIS_URL="redis://localhost:6379"
 ```
 
-*Note: You can also use an `application-secrets.properties` file locally.*
-
-### 3. Build and Run
-
-You can run the application directly using Maven:
-
+### 3. Build & Run
+Run the application directly using the Maven wrapper:
 ```bash
 ./mvnw spring-boot:run
-```
-*(Or use `mvnw.cmd` on Windows)*
-
-Alternatively, you can package it into a JAR and run it:
-```bash
-./mvnw clean package
-java -jar target/project-idea-generator-0.0.1-SNAPSHOT.jar
+# Or on Windows: mvnw.cmd spring-boot:run
 ```
 
-## 🌐 Usage
+Once started, open your browser and navigate to:  
+👉 **[http://localhost:8080](http://localhost:8080)**
 
-Once the application is running, open your web browser and navigate to:
+---
 
-```text
-http://localhost:8080
-```
+## ☁️ Cloud Deployment
 
-1. Fill out the form with your desired criteria (e.g., Python, Django, E-commerce, Intermediate).
-2. Click **Generate Idea**.
-3. Wait for the AI to process and return a comprehensive project architecture.
+When deploying to platforms like **Render**, ensure the following environment variables are configured in your dashboard:
 
-## 🌍 Deployment Architecture
+| Variable | Example Value |
+| :--- | :--- |
+| `DB_URL` | `jdbc:postgresql://aws-0-us-east-1.pooler.supabase.com:6543/postgres?prepareThreshold=0` |
+| `DB_USERNAME` | `postgres.your_supabase_project_id` |
+| `DB_PASSWORD` | `YourSupabaseDatabasePassword` |
+| `HUGGINGFACE_API_TOKEN` | `hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` |
+| `REDIS_URL` | `rediss://default:xxxxxx@eu1-xxxxxx.upstash.io:6379` |
 
-The application has been successfully deployed to the cloud:
-
-- **Full-Stack Hosting:** [Render](https://render.com) (Runs the Spring Boot backend API and serves the frontend HTML/CSS/JS)
-- **Database:** [Supabase](https://supabase.com) (Managed PostgreSQL via connection pooling)
-- **Cache:** [Upstash](https://upstash.com) (Serverless Redis for session history)
-- **AI Model:** Hugging Face API
-
-### Cloud Environment Variables
-If deploying a fork of this project to Render, ensure the following environment variables are set:
-- `DB_URL`: The JDBC pooler URL from Supabase (e.g., `jdbc:postgresql://aws-x...pooler.supabase.com:5432/postgres`)
-- `DB_USERNAME`: Supabase pooler username
-- `DB_PASSWORD`: Supabase database password
-- `HUGGINGFACE_API_TOKEN`: Your Hugging Face API token
-- `REDIS_URL`: Your Upstash Redis connection string
+---
+<p align="center">
+  Built with ❤️ using <strong>Java 21</strong>, <strong>Spring Boot 4</strong>, and <strong>Hugging Face AI</strong>.
+</p>
