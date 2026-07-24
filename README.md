@@ -177,5 +177,3 @@ When deploying to platforms like **Render**, ensure the following environment va
 <p align="center">
   Built with ❤️ using <strong>Java 21</strong>, <strong>Spring Boot 4</strong>, and <strong>Hugging Face AI</strong>.
 </p>
-   
- 
