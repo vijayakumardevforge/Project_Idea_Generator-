@@ -1837,4 +1837,15 @@ select option {
     }
 }
 
+.site-footer {
+    text-align: center;
+    padding: 2rem 1rem;
+    margin-top: 3rem;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.5);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
 
+.site-footer p {
+    margin: 0;
+}
