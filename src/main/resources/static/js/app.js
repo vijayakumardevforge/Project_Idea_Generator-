@@ -48,6 +48,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const projectDomainSelect = document.getElementById('projectDomain');
+    const customProjectTitleInput = document.getElementById('customProjectTitle');
+    const topicRadios = document.querySelectorAll('input[name="topicType"]');
+    
+    topicRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'custom') {
+                projectDomainSelect.classList.add('hidden');
+                projectDomainSelect.disabled = true;
+                customProjectTitleInput.classList.remove('hidden');
+                customProjectTitleInput.disabled = false;
+            } else {
+                projectDomainSelect.classList.remove('hidden');
+                projectDomainSelect.disabled = false;
+                customProjectTitleInput.classList.add('hidden');
+                customProjectTitleInput.disabled = true;
+            }
+        });
+    });
+
     function updateDomains() {
         const lang = programmingLanguageSelect.value;
         const fw = frameworkSelect.value;
@@ -262,9 +281,16 @@ document.addEventListener('DOMContentLoaded', () => {
             skillLevel: document.getElementById('skillLevel').value,
             programmingLanguage: document.getElementById('programmingLanguage').value,
             framework: document.getElementById('framework').value,
-            projectDomain: document.getElementById('projectDomain').value,
             previousIdeaName: window.currentProjectName || null
         };
+
+        const topicType = document.querySelector('input[name="topicType"]:checked').value;
+        if (topicType === 'custom') {
+            requestData.projectDomain = 'Custom';
+            requestData.customProjectTitle = document.getElementById('customProjectTitle').value;
+        } else {
+            requestData.projectDomain = document.getElementById('projectDomain').value;
+        }
 
         // UI State
         generateForm.parentElement.classList.add('hidden');
@@ -295,6 +321,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                if (errorData.message === "Reenter the title") {
+                    throw new Error("REENTER_TITLE");
+                }
                 throw new Error('Failed to generate project idea');
             }
 
@@ -320,7 +350,14 @@ document.addEventListener('DOMContentLoaded', () => {
             
         } catch (error) {
             console.error(error);
-            alert('An error occurred while generating the idea. Please check the backend connection and API keys.');
+            if (error.message === "REENTER_TITLE") {
+                alert("Unwanted content detected. Please re-enter a valid project title.");
+                const customTitleInput = document.getElementById('customProjectTitle');
+                customTitleInput.value = '';
+                customTitleInput.focus();
+            } else {
+                alert('An error occurred while generating the idea. Please check the backend connection and API keys.');
+            }
             
             // Reset UI State
             loadingState.classList.add('hidden');
@@ -839,6 +876,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Feedback Logic
     const feedbackModal = document.getElementById('feedback-modal');
     const floatingFeedbackBtn = document.getElementById('floating-feedback-btn');
+    
+    // Hide feedback button at the top of the page
+    function updateFeedbackButtonVisibility() {
+        if (window.scrollY > 150) {
+            floatingFeedbackBtn.classList.remove('scroll-hidden');
+        } else {
+            floatingFeedbackBtn.classList.add('scroll-hidden');
+        }
+    }
+    window.addEventListener('scroll', updateFeedbackButtonVisibility);
+    updateFeedbackButtonVisibility(); // Initial check
+    
     const closeFeedback = document.querySelector('.close-modal');
     const stars = document.querySelectorAll('.star-rating i');
     const ratingInput = document.getElementById('rating-value');

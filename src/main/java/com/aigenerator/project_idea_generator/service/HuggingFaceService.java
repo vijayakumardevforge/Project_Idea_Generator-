@@ -40,6 +40,18 @@ public class HuggingFaceService {
     }
 
     public GeneratedIdea parseAndGenerateIdea(ProjectGenerationRequest request) {
+        if (request.getCustomProjectTitle() != null) {
+            String title = request.getCustomProjectTitle().trim();
+            if (!title.isEmpty()) {
+                String lower = title.toLowerCase();
+                boolean hasVowels = lower.matches(".*[aeiouy].*");
+                if (!hasVowels && lower.replaceAll("[^a-z]", "").length() > 4) {
+                    log.warn("Instant gibberish block for title: {}", title);
+                    throw new IllegalArgumentException("INVALID_INPUT");
+                }
+            }
+        }
+        
         String prompt = buildPrompt(request);
         
         Map<String, Object> requestBody = new HashMap<>();
@@ -67,6 +79,9 @@ public class HuggingFaceService {
                     // Extract just the JSON part from the response if the model added extra text
                     return extractJsonFromResponse(generatedText, prompt);
                 }
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid input detected: {}", e.getMessage());
+                throw e; // Don't retry on invalid input
             } catch (Exception e) {
                 log.warn("Error communicating with Hugging Face API or parsing JSON on attempt {}: {}", attempt, e.getMessage());
                 if (attempt == maxRetries) {
@@ -123,7 +138,7 @@ public class HuggingFaceService {
     }
 
     private String buildRoadmapPrompt(com.aigenerator.project_idea_generator.model.ProjectIdea idea) {
-        return "<s>[INST] You are an expert Technical Project Manager and Lead Architect. " +
+        return "You are an expert Technical Project Manager and Lead Architect. " +
                "Generate a highly detailed, step-by-step Sprint Roadmap to build the following project:\n\n" +
                "**Project Name:** " + idea.getProjectName() + "\n" +
                "**Description:** " + idea.getProjectDescription() + "\n" +
@@ -133,7 +148,7 @@ public class HuggingFaceService {
                "Provide the response formatted in beautiful Markdown. " +
                "Organize the roadmap into logical 'Sprints' or 'Phases' (e.g., Phase 1: Environment Setup, Phase 2: Database Design). " +
                "Under each Sprint, provide a bulleted list of specific, actionable tasks tailored to the framework (" + idea.getFramework() + "). " +
-               "Do NOT wrap your entire response in a JSON block, just output pure Markdown text. [/INST]";
+               "Do NOT wrap your entire response in a JSON block, just output pure Markdown text.";
     }
 
     private String cleanMarkdownResponse(String responseText, String prompt) {
@@ -156,22 +171,34 @@ public class HuggingFaceService {
     }
 
     private String buildPrompt(ProjectGenerationRequest request) {
-        String prompt = "<s>[INST] You are an expert software architect. " +
-               "Generate a highly creative, real-world project idea (e.g., Food Delivery App, AI SaaS, Fintech Dashboard) " +
-               "specifically tailored for a " + request.getSkillLevel() + " developer using " + 
-               request.getProgrammingLanguage() + " with the " + request.getFramework() + " framework " +
-               "in the " + request.getProjectDomain() + " domain.\n\n";
+        String prompt;
+        if (request.getCustomProjectTitle() != null && !request.getCustomProjectTitle().trim().isEmpty()) {
+            prompt = "You are an expert software architect. " +
+                   "A user has provided the following custom project title: '" + request.getCustomProjectTitle() + "'.\n\n" +
+                   "STEP 1 (CRITICAL GIBBERISH CHECK): Evaluate if the title is valid. If it is random keyboard mashing, meaningless characters (like 'sdfuakfasfi' or 'dsgssdfrt'), or completely nonsensical, " +
+                   "you MUST abort the generation and output ONLY this exact string: {\"projectName\": \"INVALID_INPUT\"}\n\n" +
+                   "STEP 2: If the title is valid, generate a highly creative, real-world project idea based on it. " +
+                   "The project should be specifically tailored for a " + request.getSkillLevel() + " developer using " + 
+                   request.getProgrammingLanguage() + " with the " + request.getFramework() + " framework.\n\n";
+        } else {
+            prompt = "You are an expert software architect. " +
+                   "Generate a highly creative, real-world project idea (e.g., Food Delivery App, AI SaaS, Fintech Dashboard) " +
+                   "specifically tailored for a " + request.getSkillLevel() + " developer using " + 
+                   request.getProgrammingLanguage() + " with the " + request.getFramework() + " framework " +
+                   "in the " + request.getProjectDomain() + " domain.\n\n";
+        }
                
         if (request.getPreviousIdeaName() != null && !request.getPreviousIdeaName().trim().isEmpty()) {
             prompt += "CRITICAL: Do NOT generate the idea named '" + request.getPreviousIdeaName() + "' or anything similar to it. You MUST give a completely new and different idea.\n\n";
         }
         
-        prompt += "CRITICAL: You MUST write your ENTIRE response strictly in ENGLISH ONLY. Do not use Chinese or any other language.\n\n" +
+        prompt += "CRITICAL INSTRUCTION: You MUST write your ENTIRE response strictly in ENGLISH ONLY. Do not use Chinese, Spanish, or any other language under any circumstances.\n\n" +
                "Please provide a completely unique idea each time. (Request ID: " + java.util.UUID.randomUUID().toString() + ")\n" +
                "Make sure the complexity perfectly matches the '" + request.getSkillLevel() + "' level. " +
                "For the API endpoints, do not just limit it to REST! Depending on what is best for the project and framework, " +
                "you can suggest REST, GraphQL, gRPC, or WebSockets.\n\n" +
-               "Respond ONLY with a valid JSON object matching exactly this schema. " +
+               "If you aborted in STEP 1, respond ONLY with {\"projectName\": \"INVALID_INPUT\"}.\n" +
+               "Otherwise, respond ONLY with a valid JSON object matching exactly this schema. " +
                "Do NOT wrap the JSON in markdown code blocks or backticks. Just output the raw JSON string:\n" +
                "{\n" +
                "  \"projectName\": \"String (A catchy project title)\",\n" +
@@ -180,7 +207,7 @@ public class HuggingFaceService {
                "  \"suggestedTables\": [\"String\"],\n" +
                "  \"recommendedEndpoints\": [\"String (e.g., REST, GraphQL, or WebSockets)\"],\n" +
                "  \"learningRoadmap\": [\"String (Step-by-step roadmap for this specific framework)\"]\n" +
-               "} [/INST]";
+               "}";
                
         return prompt;
     }
@@ -202,7 +229,11 @@ public class HuggingFaceService {
                 JsonNode rootNode = objectMapper.readTree(jsonStr);
                 
                 GeneratedIdea idea = new GeneratedIdea();
-                idea.setProjectName(rootNode.path("projectName").asText("Unnamed Project"));
+                String pName = rootNode.path("projectName").asText("Unnamed Project");
+                if ("INVALID_INPUT".equals(pName)) {
+                    throw new IllegalArgumentException("INVALID_INPUT");
+                }
+                idea.setProjectName(pName);
                 idea.setProjectDescription(rootNode.path("projectDescription").asText("No description provided."));
                 
                 idea.setKeyFeatures(extractList(rootNode, "keyFeatures"));

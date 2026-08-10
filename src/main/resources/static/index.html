@@ -134,7 +134,16 @@
                         </div>
 
                         <div class="input-group">
-                            <label for="projectDomain">Project Domain</label>
+                            <label>Project Topic</label>
+                            <div class="toggle-group" style="display: flex; gap: 1rem; margin-bottom: 0.75rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer; color: var(--text-light);">
+                                    <input type="radio" name="topicType" value="domain" checked style="width: auto;"> Choose Domain
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer; color: var(--text-light);">
+                                    <input type="radio" name="topicType" value="custom" style="width: auto;"> Custom Title
+                                </label>
+                            </div>
+                            
                             <select id="projectDomain" required>
                                 <option value="" disabled selected>Select Domain</option>
                                 <option value="Education">Education</option>
@@ -145,6 +154,8 @@
                                 <option value="Productivity">Productivity</option>
                                 <option value="Entertainment">Entertainment</option>
                             </select>
+                            
+                            <input type="text" id="customProjectTitle" placeholder="e.g., Smart Home IoT Dashboard" class="hidden" disabled style="width: 100%; padding: 0.8rem 1rem; border-radius: 0.5rem; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 0, 0, 0.2); color: var(--text-light);">
                         </div>
                     </div>
                     
