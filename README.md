@@ -88,7 +88,9 @@ flowchart TB
 
 ## ✨ Key Features
 
-- **🧠 Dynamic AI Architecting:** Generates customized project structures based on your skill level (`Beginner`, `Intermediate`, `Advanced`).
+- **🧠 Dynamic AI Architecting:** Generates customized project structures based on your skill level (`Beginner`, `Intermediate`, `Advanced`) and domain.
+- **💡 Custom Idea Synthesis:** Provide your own custom project title (e.g., "Smart Home IoT Dashboard") and the AI will architect it for your stack.
+- **🛡️ AI & Heuristic Validation:** Multi-layered gibberish detection blocks random keyboard smashing (like "dsgssdfrt") using backend heuristics and rigorous AI prompting.
 - **🗺️ Interactive Roadmaps & PDF Export:** Synthesizes deep, multi-sprint implementation plans and allows native client-side vector PDF export via `jsPDF` and `Marked`.
 - **🎨 Cyberpunk Glassmorphism UI:** Features an animated neural wake-up portal, radar sweeps, interactive onboarding walkthrough guide, and a floating feedback modal.
 - **🔐 Enterprise Security:** Integrates `BCrypt` hashing, session authentication, and automated IP tracking for failed login attempts.
