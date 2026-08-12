@@ -1028,7 +1028,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Auto-trigger interactive step-by-step tour for first-time visitors
             if (!localStorage.getItem('hasSeenTour_v1') && typeof window.openTourModal === 'function') {
-                setTimeout(() => window.openTourModal(0), 600);
+                setTimeout(() => window.openTourModal(0), 0);
             }
         }, 750);
     }
@@ -1076,10 +1076,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (introSteps[2]) introSteps[2].classList.add('active');
         }, 4000));
 
-        // Auto dismiss after 6.5s
-        introTimeouts.push(setTimeout(() => {
-            dismissPortal();
-        }, durationMs));
+        // Auto dismiss disabled - waiting for user click
+        // introTimeouts.push(setTimeout(() => {
+        //     dismissPortal();
+        // }, durationMs));
     }
 
     if (skipIntroBtn) {
@@ -1109,7 +1109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         playIntroAnimation();
     } else if (!localStorage.getItem('hasSeenTour_v1')) {
         // If they already saw the intro but haven't seen the tour, open it
-        setTimeout(() => window.openTourModal(0), 500);
+        setTimeout(() => window.openTourModal(0), 0);
     }
 
     // --- Interactive Step-by-Step Onboarding Walkthrough Tour Logic ---
@@ -1206,7 +1206,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const el = document.querySelector(step.spotlight);
                 if (el && !el.classList.contains('hidden')) {
                     el.classList.add('tour-spotlight');
-                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }
         };
@@ -1226,7 +1225,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeTourModal() {
         clearTourSpotlights();
-        if (tourOverlay) tourOverlay.classList.add('hidden');
+        if (tourOverlay) {
+            tourOverlay.classList.add('closing');
+            setTimeout(() => {
+                tourOverlay.classList.add('hidden');
+                tourOverlay.classList.remove('closing');
+            }, 500);
+        }
         localStorage.setItem('hasSeenTour_v1', 'true');
     }
 
