@@ -91,6 +91,9 @@
                     <div class="sidebar-link" data-tab="tab-recent-users">
                         <i class="fa-solid fa-users-viewfinder"></i> Top Users
                     </div>
+                    <div class="sidebar-link" data-tab="tab-recent-24h">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Recent Activity (24h)
+                    </div>
                     <div class="sidebar-link" data-tab="tab-rate-limited">
                         <i class="fa-solid fa-hand-paper"></i> Limit Reached
                     </div>
@@ -204,6 +207,26 @@
                                 </thead>
                                 <tbody id="recent-users-body">
                                     <!-- Recent users will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity (24h) Tab -->
+                    <div id="tab-recent-24h" class="dashboard-tab">
+                        <h2 style="margin-bottom: 1.5rem; color: var(--text-main); font-family: var(--font-heading);"><i class="fa-solid fa-clock-rotate-left" style="color: #3b82f6;"></i> Recent Activity (24h)</h2>
+                        <div class="glass table-container" style="overflow-x: auto; margin-bottom: 3rem;">
+                            <table class="admin-table" id="recent-24h-table">
+                                <thead>
+                                    <tr>
+                                        <th>IP Address</th>
+                                        <th>Device / User Agent</th>
+                                        <th>Last Active</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-24h-body">
+                                    <!-- 24h users will be injected here -->
                                 </tbody>
                             </table>
                         </div>

@@ -175,4 +175,39 @@ public class AdminFeatureService {
         rateLimitedUsers.sort((u1, u2) -> u2.get("hitLimitAt").compareTo(u1.get("hitLimitAt")));
         return rateLimitedUsers;
     }
+
+    public List<Map<String, String>> getRecent24HourUsers() {
+        LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
+        List<ProjectIdea> recentIdeas = projectIdeaRepository.findAll().stream()
+                .filter(idea -> idea.getCreatedAt() != null && idea.getCreatedAt().isAfter(twentyFourHoursAgo))
+                .toList();
+
+        Map<String, ProjectIdea> latestIdeaPerIp = new HashMap<>();
+
+        for (ProjectIdea idea : recentIdeas) {
+            String ip = idea.getIpAddress();
+            if (ip == null || ip.isEmpty()) continue;
+
+            ProjectIdea existingLatest = latestIdeaPerIp.get(ip);
+            if (existingLatest == null || idea.getCreatedAt().isAfter(existingLatest.getCreatedAt())) {
+                latestIdeaPerIp.put(ip, idea);
+            }
+        }
+
+        List<Map<String, String>> recentUsers = new ArrayList<>();
+        for (Map.Entry<String, ProjectIdea> entry : latestIdeaPerIp.entrySet()) {
+            String ip = entry.getKey();
+            ProjectIdea latestIdea = entry.getValue();
+            Map<String, String> userInfo = new HashMap<>();
+            userInfo.put("ipAddress", ip);
+            userInfo.put("userAgent", latestIdea.getUserAgent() != null ? latestIdea.getUserAgent() : "Unknown");
+            userInfo.put("lastActive", latestIdea.getCreatedAt().toString());
+            userInfo.put("isBlocked", String.valueOf(blockedIpRepository.existsByIpAddress(ip)));
+            recentUsers.add(userInfo);
+        }
+
+        // Sort by lastActive descending (most recent first)
+        recentUsers.sort((u1, u2) -> u2.get("lastActive").compareTo(u1.get("lastActive")));
+        return recentUsers;
+    }
 }

@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadApiUsage(authString);
                 loadRecentUsers(authString);
                 loadRateLimitedUsers(authString);
+                loadRecent24HourUsers(authString);
                 loadBlockedIps(authString);
             } else {
                 // Failure
@@ -162,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function loadFailedLogins(authString) {
-        const failedLoginBody = document.getElementById('failed-login-body');
+        const failedLoginBody = document.getElementById('failed-logins-body');
         try {
             const response = await fetch(`${API_BASE_URL}/failed-logins`, {
                 headers: { 'Authorization': authString }
@@ -188,12 +189,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         failedLogins.forEach(attempt => {
             const tr = document.createElement('tr');
-            const date = new Date(attempt.attemptTime).toLocaleDateString(undefined, { 
-                year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
-            });
-
+            
             tr.innerHTML = `
-                <td data-label="Date & Time">${date}</td>
+                <td data-label="Date & Time">${formatServerTime(attempt.attemptTime)}</td>
                 <td data-label="Username Attempted" style="color: #ef4444; font-weight: 500; word-break: break-all;">${attempt.username}</td>
                 <td data-label="IP Address" style="font-family: monospace;">${attempt.ipAddress || 'Unknown'}</td>
                 <td>
@@ -238,6 +236,33 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error('Error loading API usage:', error); }
     }
 
+    function formatDeviceName(uaString) {
+        if (!uaString) return 'Unknown';
+        
+        // Extract exact model if present (e.g. [Model: RMX3842])
+        const modelMatch = uaString.match(/\[Model:\s*(.*?)\]/i);
+        if (modelMatch && modelMatch[1]) {
+            return modelMatch[1].trim();
+        }
+        
+        // Fallbacks based on common substrings
+        const uaLower = uaString.toLowerCase();
+        if (uaLower.includes('windows')) return 'Windows';
+        if (uaLower.includes('mac os') || uaLower.includes('macintosh')) return 'Mac';
+        if (uaLower.includes('android')) return 'Android';
+        if (uaLower.includes('iphone') || uaLower.includes('ipad')) return 'iOS';
+        if (uaLower.includes('linux')) return 'Linux';
+        
+        // Final fallback: just return up to first 20 chars so it doesn't break layout
+        return uaString.length > 20 ? uaString.substring(0, 20) + '...' : uaString;
+    }
+
+    function formatServerTime(timeString) {
+        if (!timeString) return 'Unknown';
+        // Strip out the 'T' and milliseconds to show exactly what the server sent
+        return timeString.split('.')[0].replace('T', ' ');
+    }
+
     async function loadRecentUsers(authString) {
         const body = document.getElementById('recent-users-body');
         try {
@@ -254,9 +279,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const isBlocked = u.isBlocked === 'true';
                     tr.innerHTML = `
                         <td>${u.ipAddress}</td>
-                        <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${u.userAgent}">${u.userAgent}</td>
+                        <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${u.userAgent}">${formatDeviceName(u.userAgent)}</td>
                         <td><span style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; padding: 0.2rem 0.6rem; border-radius: 999px; font-weight: bold; border: 1px solid rgba(245, 158, 11, 0.3);">${u.ideaCount}</span></td>
-                        <td>${new Date(u.lastActive).toLocaleString()}</td>
+                        <td>${formatServerTime(u.lastActive)}</td>
                         <td>
                             ${!isBlocked ? `<button class="neon-btn" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="blockUser('${u.ipAddress}')">Block</button>` 
                                          : '<span style="color: #ef4444; font-weight: bold;">Blocked</span>'}
@@ -284,8 +309,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const isBlocked = u.isBlocked === 'true';
                     tr.innerHTML = `
                         <td>${u.ipAddress}</td>
-                        <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${u.userAgent}">${u.userAgent}</td>
-                        <td>${new Date(u.hitLimitAt).toLocaleString()}</td>
+                        <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${u.userAgent}">${formatDeviceName(u.userAgent)}</td>
+                        <td>${formatServerTime(u.hitLimitAt)}</td>
                         <td>
                             ${!isBlocked ? `<button class="neon-btn" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="blockUser('${u.ipAddress}')">Block</button>` 
                                          : '<span style="color: #ef4444; font-weight: bold;">Blocked</span>'}
@@ -295,6 +320,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         } catch (error) { console.error('Error loading rate limited users:', error); }
+    }
+
+    async function loadRecent24HourUsers(authString) {
+        const body = document.getElementById('recent-24h-body');
+        try {
+            const response = await fetch(`${API_BASE_URL}/recent-24h`, { headers: { 'Authorization': authString } });
+            if (response.ok) {
+                const users = await response.json();
+                body.innerHTML = '';
+                if (users.length === 0) {
+                    body.innerHTML = '<tr><td colspan="4" style="text-align:center;">No users active in the last 24 hours.</td></tr>';
+                    return;
+                }
+                users.forEach(u => {
+                    const tr = document.createElement('tr');
+                    const isBlocked = u.isBlocked === 'true';
+                    tr.innerHTML = `
+                        <td>${u.ipAddress}</td>
+                        <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${u.userAgent}">${formatDeviceName(u.userAgent)}</td>
+                        <td>${formatServerTime(u.lastActive)}</td>
+                        <td>
+                            ${!isBlocked ? `<button class="neon-btn" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="blockUser('${u.ipAddress}')">Block</button>` 
+                                         : '<span style="color: #ef4444; font-weight: bold;">Blocked</span>'}
+                        </td>
+                    `;
+                    body.appendChild(tr);
+                });
+            }
+        } catch (error) { console.error('Error loading recent 24h users:', error); }
     }
 
     async function loadBlockedIps(authString) {
@@ -312,10 +366,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td>${ip.ipAddress}</td>
-                        <td>${ip.reason}</td>
-                        <td>${new Date(ip.blockedAt).toLocaleString()}</td>
+                        <td>${ip.reason || 'Manual block by admin'}</td>
+                        <td>${formatServerTime(ip.blockedAt)}</td>
                         <td>
-                            <button class="neon-btn" style="padding: 0.3rem 0.8rem; font-size: 0.8rem; background-color: #10b981; color: white; border: none;" onclick="unblockUser('${ip.ipAddress}')">Unblock</button>
+                            <button class="neon-btn" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: #10b981; padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="unblockUser('${ip.ipAddress}')">Unblock</button>
                         </td>
                     `;
                     body.appendChild(tr);
@@ -325,17 +379,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.blockUser = async function(ipAddress) {
-        if (!confirm(`Are you sure you want to block ${ipAddress}?`)) return;
+        const reason = prompt(`Enter reason for blocking ${ipAddress} (or leave blank):`, 'Suspicious activity');
+        if (reason === null) return; // User cancelled
+
         const authString = sessionStorage.getItem('adminAuth');
         try {
             const res = await fetch(`${API_BASE_URL}/block-ip`, {
                 method: 'POST',
                 headers: { 'Authorization': authString, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ipAddress: ipAddress, reason: 'Manual block by admin' })
+                body: JSON.stringify({ ipAddress: ipAddress, reason: reason })
             });
             if (res.ok) {
                 loadRecentUsers(authString);
                 loadRateLimitedUsers(authString);
+                loadRecent24HourUsers(authString);
                 loadBlockedIps(authString);
             }
         } catch (error) { console.error('Error blocking user:', error); }
@@ -353,6 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok) {
                 loadRecentUsers(authString);
                 loadRateLimitedUsers(authString);
+                loadRecent24HourUsers(authString);
                 loadBlockedIps(authString);
             }
         } catch (error) { console.error('Error unblocking user:', error); }

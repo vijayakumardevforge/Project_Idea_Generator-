@@ -88,6 +88,11 @@ public class AdminController {
         return ResponseEntity.ok(adminFeatureService.getRateLimitedUsers(15));
     }
 
+    @GetMapping("/recent-24h")
+    public ResponseEntity<List<Map<String, String>>> getRecent24HourUsers() {
+        return ResponseEntity.ok(adminFeatureService.getRecent24HourUsers());
+    }
+
     @GetMapping("/blocked-ips")
     public ResponseEntity<List<BlockedIp>> getBlockedIps() {
         return ResponseEntity.ok(adminFeatureService.getBlockedIps());
