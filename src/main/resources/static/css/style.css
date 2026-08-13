@@ -921,6 +921,22 @@ select option {
     box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.5) !important;
 }
 
+.neon-btn-danger {
+    background: #ef4444 !important;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5) !important;
+}
+.neon-btn-danger:hover {
+    box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.7) !important;
+}
+
+.neon-btn-success {
+    background: #10b981 !important;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5) !important;
+}
+.neon-btn-success:hover {
+    box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.7) !important;
+}
+
 .neon-title {
     background: linear-gradient(to right, #8b5cf6, #ec4899);
     -webkit-background-clip: text;

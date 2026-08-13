@@ -24,6 +24,7 @@ public class BlockedIp {
     private String ipAddress;
 
     private String reason;
+    private String userAgent;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime blockedAt;

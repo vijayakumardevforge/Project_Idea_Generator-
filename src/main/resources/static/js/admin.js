@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td data-label="Username Attempted" style="color: #ef4444; font-weight: 500; word-break: break-all;">${attempt.username}</td>
                 <td data-label="IP Address" style="font-family: monospace;">${attempt.ipAddress || 'Unknown'}</td>
                 <td>
-                    <button class="neon-btn" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="blockUser('${attempt.ipAddress}')">Block</button>
+                    <button class="neon-btn neon-btn-danger" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="blockUser('${attempt.ipAddress}')">Block</button>
                 </td>
             `;
             container.appendChild(tr);
@@ -283,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td><span style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; padding: 0.2rem 0.6rem; border-radius: 999px; font-weight: bold; border: 1px solid rgba(245, 158, 11, 0.3);">${u.ideaCount}</span></td>
                         <td>${formatServerTime(u.lastActive)}</td>
                         <td>
-                            ${!isBlocked ? `<button class="neon-btn" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="blockUser('${u.ipAddress}')">Block</button>` 
+                            ${!isBlocked ? `<button class="neon-btn neon-btn-danger" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="blockUser('${u.ipAddress}')">Block</button>` 
                                          : '<span style="color: #ef4444; font-weight: bold;">Blocked</span>'}
                         </td>
                     `;
@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${u.userAgent}">${formatDeviceName(u.userAgent)}</td>
                         <td>${formatServerTime(u.hitLimitAt)}</td>
                         <td>
-                            ${!isBlocked ? `<button class="neon-btn" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="blockUser('${u.ipAddress}')">Block</button>` 
+                            ${!isBlocked ? `<button class="neon-btn neon-btn-danger" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="blockUser('${u.ipAddress}')">Block</button>` 
                                          : '<span style="color: #ef4444; font-weight: bold;">Blocked</span>'}
                         </td>
                     `;
@@ -341,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${u.userAgent}">${formatDeviceName(u.userAgent)}</td>
                         <td>${formatServerTime(u.lastActive)}</td>
                         <td>
-                            ${!isBlocked ? `<button class="neon-btn" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="blockUser('${u.ipAddress}')">Block</button>` 
+                            ${!isBlocked ? `<button class="neon-btn neon-btn-danger" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="blockUser('${u.ipAddress}')">Block</button>` 
                                          : '<span style="color: #ef4444; font-weight: bold;">Blocked</span>'}
                         </td>
                     `;
@@ -366,10 +366,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td>${ip.ipAddress}</td>
+                        <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${ip.userAgent}">${formatDeviceName(ip.userAgent)}</td>
                         <td>${ip.reason || 'Manual block by admin'}</td>
                         <td>${formatServerTime(ip.blockedAt)}</td>
                         <td>
-                            <button class="neon-btn" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: #10b981; padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="unblockUser('${ip.ipAddress}')">Unblock</button>
+                            <button class="neon-btn neon-btn-success" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="unblockUser('${ip.ipAddress}')">Unblock</button>
                         </td>
                     `;
                     body.appendChild(tr);

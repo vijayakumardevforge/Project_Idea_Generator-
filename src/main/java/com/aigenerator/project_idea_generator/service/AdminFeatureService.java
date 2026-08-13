@@ -48,9 +48,16 @@ public class AdminFeatureService {
     @Transactional
     public void blockIp(String ipAddress, String reason) {
         if (ipAddress != null && !ipAddress.isEmpty() && !blockedIpRepository.existsByIpAddress(ipAddress)) {
+            String userAgent = "Unknown";
+            ProjectIdea recentIdea = projectIdeaRepository.findFirstByIpAddressOrderByCreatedAtDesc(ipAddress);
+            if (recentIdea != null && recentIdea.getUserAgent() != null) {
+                userAgent = recentIdea.getUserAgent();
+            }
+
             BlockedIp blockedIp = BlockedIp.builder()
                     .ipAddress(ipAddress)
                     .reason(reason != null ? reason : "Manual block by admin")
+                    .userAgent(userAgent)
                     .build();
             blockedIpRepository.save(blockedIp);
         }

@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @Repository
 public interface ProjectIdeaRepository extends JpaRepository<ProjectIdea, Long> {
     List<ProjectIdea> findAllByOrderByCreatedAtDesc();
+    
+    ProjectIdea findFirstByIpAddressOrderByCreatedAtDesc(String ipAddress);
 
     long countByCreatedAtAfter(LocalDateTime date);
     
