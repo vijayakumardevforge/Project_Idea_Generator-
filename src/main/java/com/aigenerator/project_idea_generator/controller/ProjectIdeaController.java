@@ -23,7 +23,11 @@ public class ProjectIdeaController {
     private final com.aigenerator.project_idea_generator.repository.ProjectIdeaRepository ideaRepository;
     private final com.aigenerator.project_idea_generator.service.AdminFeatureService adminFeatureService;
 
-    public ProjectIdeaController(ProjectIdeaService service, com.aigenerator.project_idea_generator.service.HistoryService historyService, com.aigenerator.project_idea_generator.repository.UserRepository userRepository, com.aigenerator.project_idea_generator.repository.ProjectIdeaRepository ideaRepository, com.aigenerator.project_idea_generator.service.AdminFeatureService adminFeatureService) {
+    public ProjectIdeaController(ProjectIdeaService service,
+            com.aigenerator.project_idea_generator.service.HistoryService historyService,
+            com.aigenerator.project_idea_generator.repository.UserRepository userRepository,
+            com.aigenerator.project_idea_generator.repository.ProjectIdeaRepository ideaRepository,
+            com.aigenerator.project_idea_generator.service.AdminFeatureService adminFeatureService) {
         this.service = service;
         this.historyService = historyService;
         this.userRepository = userRepository;
@@ -36,38 +40,38 @@ public class ProjectIdeaController {
             @Valid @RequestBody ProjectGenerationRequest request,
             @RequestHeader(value = "X-Session-Id", required = false) String sessionId,
             HttpServletRequest httpRequest) {
-            
+
         String ipAddress = extractIp(httpRequest);
-        
+
         if (adminFeatureService.isIpBlocked(ipAddress)) {
             return ResponseEntity.status(403).build();
         }
-        
+
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         long ideasToday = ideaRepository.countByIpAddressAndCreatedAtAfter(ipAddress, startOfDay);
-        if (ideasToday >= 15) {
+        if (ideasToday >= 1000) {
             return ResponseEntity.status(429).build(); // Too Many Requests
         }
-        
+
         String userAgent = httpRequest.getHeader("X-Client-User-Agent");
         if (userAgent == null || userAgent.isEmpty()) {
             userAgent = httpRequest.getHeader("User-Agent");
         }
-            
+
         ProjectIdea generatedIdea = service.generateAndSaveProjectIdea(request, ipAddress, userAgent);
-        
+
         // Save to Redis cache if sessionId is provided
         if (sessionId != null && !sessionId.isEmpty()) {
             historyService.saveIdeaToHistory(sessionId, generatedIdea);
         }
-        
+
         return ResponseEntity.ok(generatedIdea);
     }
 
     @GetMapping("/history")
     public ResponseEntity<Object> getHistory(
             @RequestHeader(value = "X-Session-Id", required = false) String sessionId) {
-            
+
         // If session ID is provided, fetch from Redis.
         if (sessionId != null && !sessionId.isEmpty()) {
             List<ProjectIdea> history = historyService.getUserHistory(sessionId);
@@ -75,7 +79,7 @@ public class ProjectIdeaController {
                 return ResponseEntity.ok(history);
             }
         }
-        
+
         // Return a clear message object when there is no history, exactly as requested
         return ResponseEntity.ok(java.util.Map.of("message", "no history"));
     }
@@ -91,23 +95,25 @@ public class ProjectIdeaController {
         if (adminFeatureService.isIpBlocked(ipAddress)) {
             return ResponseEntity.status(403).build();
         }
-        
+
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         long ideasToday = ideaRepository.countByIpAddressAndCreatedAtAfter(ipAddress, startOfDay);
-        if (ideasToday >= 15) {
+        if (ideasToday >= 1000) {
             return ResponseEntity.status(429).build(); // Too Many Requests
         }
-        
+
         return ResponseEntity.ok(service.generateAndSaveRoadmap(id));
     }
 
     @PostMapping("/{id}/save")
-    public ResponseEntity<?> saveIdeaForUser(@PathVariable Long id, org.springframework.security.core.Authentication authentication) {
+    public ResponseEntity<?> saveIdeaForUser(@PathVariable Long id,
+            org.springframework.security.core.Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(401).body(java.util.Map.of("message", "Unauthorized"));
         }
-        
-        java.util.Optional<com.aigenerator.project_idea_generator.model.User> userOpt = userRepository.findByEmail(authentication.getName());
+
+        java.util.Optional<com.aigenerator.project_idea_generator.model.User> userOpt = userRepository
+                .findByEmail(authentication.getName());
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(401).body(java.util.Map.of("message", "User not found"));
         }
@@ -121,11 +127,13 @@ public class ProjectIdeaController {
 
     @GetMapping("/saved")
     public ResponseEntity<?> getSavedIdeas(org.springframework.security.core.Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
             return ResponseEntity.status(401).body(java.util.Map.of("message", "Unauthorized"));
         }
 
-        java.util.Optional<com.aigenerator.project_idea_generator.model.User> userOpt = userRepository.findByEmail(authentication.getName());
+        java.util.Optional<com.aigenerator.project_idea_generator.model.User> userOpt = userRepository
+                .findByEmail(authentication.getName());
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(401).body(java.util.Map.of("message", "User not found"));
         }
@@ -136,7 +144,7 @@ public class ProjectIdeaController {
         }
         return ResponseEntity.ok(savedIdeas);
     }
-    
+
     private String extractIp(HttpServletRequest httpRequest) {
         String ipAddress = httpRequest.getHeader("X-Forwarded-For");
         if (ipAddress == null || ipAddress.isEmpty()) {

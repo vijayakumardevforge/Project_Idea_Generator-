@@ -103,13 +103,13 @@ public class AdminController {
         String ipAddress = payload.get("ipAddress");
         String reason = payload.get("reason");
         adminFeatureService.blockIp(ipAddress, reason);
-        return ResponseEntity.ok(Map.of("message", "IP Blocked successfully"));
+        return ResponseEntity.ok(java.util.Collections.singletonMap("message", "IP Blocked successfully"));
     }
 
     @PostMapping("/unblock-ip")
     public ResponseEntity<Map<String, String>> unblockIp(@RequestBody Map<String, String> payload) {
         String ipAddress = payload.get("ipAddress");
         adminFeatureService.unblockIp(ipAddress);
-        return ResponseEntity.ok(Map.of("message", "IP Unblocked successfully"));
+        return ResponseEntity.ok(java.util.Collections.singletonMap("message", "IP Unblocked successfully"));
     }
 }
