@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
@@ -19,12 +21,14 @@ public class ProjectIdeaController {
     private final com.aigenerator.project_idea_generator.service.HistoryService historyService;
     private final com.aigenerator.project_idea_generator.repository.UserRepository userRepository;
     private final com.aigenerator.project_idea_generator.repository.ProjectIdeaRepository ideaRepository;
+    private final com.aigenerator.project_idea_generator.service.AdminFeatureService adminFeatureService;
 
-    public ProjectIdeaController(ProjectIdeaService service, com.aigenerator.project_idea_generator.service.HistoryService historyService, com.aigenerator.project_idea_generator.repository.UserRepository userRepository, com.aigenerator.project_idea_generator.repository.ProjectIdeaRepository ideaRepository) {
+    public ProjectIdeaController(ProjectIdeaService service, com.aigenerator.project_idea_generator.service.HistoryService historyService, com.aigenerator.project_idea_generator.repository.UserRepository userRepository, com.aigenerator.project_idea_generator.repository.ProjectIdeaRepository ideaRepository, com.aigenerator.project_idea_generator.service.AdminFeatureService adminFeatureService) {
         this.service = service;
         this.historyService = historyService;
         this.userRepository = userRepository;
         this.ideaRepository = ideaRepository;
+        this.adminFeatureService = adminFeatureService;
     }
 
     @PostMapping("/generate")
@@ -33,13 +37,16 @@ public class ProjectIdeaController {
             @RequestHeader(value = "X-Session-Id", required = false) String sessionId,
             HttpServletRequest httpRequest) {
             
-        // Render passes the real IP in the X-Forwarded-For header. Fallback to direct remote address.
-        String ipAddress = httpRequest.getHeader("X-Forwarded-For");
-        if (ipAddress == null || ipAddress.isEmpty()) {
-            ipAddress = httpRequest.getRemoteAddr();
-        } else {
-            // X-Forwarded-For can contain multiple IPs, the first one is the client.
-            ipAddress = ipAddress.split(",")[0].trim();
+        String ipAddress = extractIp(httpRequest);
+        
+        if (adminFeatureService.isIpBlocked(ipAddress)) {
+            return ResponseEntity.status(403).build();
+        }
+        
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        long ideasToday = ideaRepository.countByIpAddressAndCreatedAtAfter(ipAddress, startOfDay);
+        if (ideasToday >= 15) {
+            return ResponseEntity.status(429).build(); // Too Many Requests
         }
         
         String userAgent = httpRequest.getHeader("X-Client-User-Agent");
@@ -79,7 +86,18 @@ public class ProjectIdeaController {
     }
 
     @PostMapping("/{id}/roadmap")
-    public ResponseEntity<ProjectIdea> generateRoadmap(@PathVariable Long id) {
+    public ResponseEntity<ProjectIdea> generateRoadmap(@PathVariable Long id, HttpServletRequest httpRequest) {
+        String ipAddress = extractIp(httpRequest);
+        if (adminFeatureService.isIpBlocked(ipAddress)) {
+            return ResponseEntity.status(403).build();
+        }
+        
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        long ideasToday = ideaRepository.countByIpAddressAndCreatedAtAfter(ipAddress, startOfDay);
+        if (ideasToday >= 15) {
+            return ResponseEntity.status(429).build(); // Too Many Requests
+        }
+        
         return ResponseEntity.ok(service.generateAndSaveRoadmap(id));
     }
 
@@ -117,5 +135,15 @@ public class ProjectIdeaController {
             return ResponseEntity.ok(java.util.Map.of("message", "no history"));
         }
         return ResponseEntity.ok(savedIdeas);
+    }
+    
+    private String extractIp(HttpServletRequest httpRequest) {
+        String ipAddress = httpRequest.getHeader("X-Forwarded-For");
+        if (ipAddress == null || ipAddress.isEmpty()) {
+            ipAddress = httpRequest.getRemoteAddr();
+        } else {
+            ipAddress = ipAddress.split(",")[0].trim();
+        }
+        return ipAddress;
     }
 }

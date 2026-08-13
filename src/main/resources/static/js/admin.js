@@ -64,10 +64,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 dashboardSection.classList.remove('hidden');
                 logoutBtn.classList.remove('hidden');
                 loginError.classList.add('hidden');
-                
                 loadFeedback(authString);
                 loadFailedLogins(authString);
                 loadStats(authString);
+                loadApiUsage(authString);
+                loadRecentUsers(authString);
+                loadRateLimitedUsers(authString);
+                loadBlockedIps(authString);
             } else {
                 // Failure
                 loginError.classList.remove('hidden');
@@ -179,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = '';
         
         if (failedLogins.length === 0) {
-            container.innerHTML = '<tr class="empty-row"><td colspan="3" style="text-align: center; color: var(--text-muted);">No failed login attempts recorded. Secure!</td></tr>';
+            container.innerHTML = '<tr class="empty-row"><td colspan="4" style="text-align: center; color: var(--text-muted);">No failed login attempts recorded. Secure!</td></tr>';
             return;
         }
 
@@ -193,6 +196,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td data-label="Date & Time">${date}</td>
                 <td data-label="Username Attempted" style="color: #ef4444; font-weight: 500; word-break: break-all;">${attempt.username}</td>
                 <td data-label="IP Address" style="font-family: monospace;">${attempt.ipAddress || 'Unknown'}</td>
+                <td>
+                    <button class="neon-btn" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="blockUser('${attempt.ipAddress}')">Block</button>
+                </td>
             `;
             container.appendChild(tr);
         });
@@ -208,11 +214,147 @@ document.addEventListener('DOMContentLoaded', () => {
                 const stats = await response.json();
                 document.getElementById('stat-users').textContent = stats.totalUsersToday;
                 document.getElementById('stat-ideas').textContent = stats.totalIdeasToday;
+                document.getElementById('stat-total-users').textContent = stats.totalUsers;
+                document.getElementById('stat-total-ideas').textContent = stats.totalIdeas;
             }
         } catch (error) {
             console.error('Error loading stats:', error);
             document.getElementById('stat-users').textContent = '-';
             document.getElementById('stat-ideas').textContent = '-';
+            document.getElementById('stat-total-users').textContent = '-';
+            document.getElementById('stat-total-ideas').textContent = '-';
         }
     }
+    async function loadApiUsage(authString) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api-usage`, { headers: { 'Authorization': authString } });
+            if (response.ok) {
+                const stats = await response.json();
+                document.getElementById('stat-idea-api-today').textContent = stats.ideaCallsToday;
+                document.getElementById('stat-idea-api-month').textContent = stats.ideaCallsMonth;
+                document.getElementById('stat-roadmap-api-today').textContent = stats.roadmapCallsToday;
+                document.getElementById('stat-roadmap-api-month').textContent = stats.roadmapCallsMonth;
+            }
+        } catch (error) { console.error('Error loading API usage:', error); }
+    }
+
+    async function loadRecentUsers(authString) {
+        const body = document.getElementById('recent-users-body');
+        try {
+            const response = await fetch(`${API_BASE_URL}/recent-users`, { headers: { 'Authorization': authString } });
+            if (response.ok) {
+                const users = await response.json();
+                body.innerHTML = '';
+                if (users.length === 0) {
+                    body.innerHTML = '<tr><td colspan="5" style="text-align:center;">No recent users found.</td></tr>';
+                    return;
+                }
+                users.forEach(u => {
+                    const tr = document.createElement('tr');
+                    const isBlocked = u.isBlocked === 'true';
+                    tr.innerHTML = `
+                        <td>${u.ipAddress}</td>
+                        <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${u.userAgent}">${u.userAgent}</td>
+                        <td><span style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; padding: 0.2rem 0.6rem; border-radius: 999px; font-weight: bold; border: 1px solid rgba(245, 158, 11, 0.3);">${u.ideaCount}</span></td>
+                        <td>${new Date(u.lastActive).toLocaleString()}</td>
+                        <td>
+                            ${!isBlocked ? `<button class="neon-btn" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="blockUser('${u.ipAddress}')">Block</button>` 
+                                         : '<span style="color: #ef4444; font-weight: bold;">Blocked</span>'}
+                        </td>
+                    `;
+                    body.appendChild(tr);
+                });
+            }
+        } catch (error) { console.error('Error loading recent users:', error); }
+    }
+
+    async function loadRateLimitedUsers(authString) {
+        const body = document.getElementById('rate-limited-body');
+        try {
+            const response = await fetch(`${API_BASE_URL}/rate-limited-users`, { headers: { 'Authorization': authString } });
+            if (response.ok) {
+                const users = await response.json();
+                body.innerHTML = '';
+                if (users.length === 0) {
+                    body.innerHTML = '<tr><td colspan="4" style="text-align:center;">No users hit the limit today.</td></tr>';
+                    return;
+                }
+                users.forEach(u => {
+                    const tr = document.createElement('tr');
+                    const isBlocked = u.isBlocked === 'true';
+                    tr.innerHTML = `
+                        <td>${u.ipAddress}</td>
+                        <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${u.userAgent}">${u.userAgent}</td>
+                        <td>${new Date(u.hitLimitAt).toLocaleString()}</td>
+                        <td>
+                            ${!isBlocked ? `<button class="neon-btn" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="blockUser('${u.ipAddress}')">Block</button>` 
+                                         : '<span style="color: #ef4444; font-weight: bold;">Blocked</span>'}
+                        </td>
+                    `;
+                    body.appendChild(tr);
+                });
+            }
+        } catch (error) { console.error('Error loading rate limited users:', error); }
+    }
+
+    async function loadBlockedIps(authString) {
+        const body = document.getElementById('blocked-ips-body');
+        try {
+            const response = await fetch(`${API_BASE_URL}/blocked-ips`, { headers: { 'Authorization': authString } });
+            if (response.ok) {
+                const ips = await response.json();
+                body.innerHTML = '';
+                if (ips.length === 0) {
+                    body.innerHTML = '<tr><td colspan="4" style="text-align:center;">No blocked IPs.</td></tr>';
+                    return;
+                }
+                ips.forEach(ip => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${ip.ipAddress}</td>
+                        <td>${ip.reason}</td>
+                        <td>${new Date(ip.blockedAt).toLocaleString()}</td>
+                        <td>
+                            <button class="neon-btn" style="padding: 0.3rem 0.8rem; font-size: 0.8rem; background-color: #10b981; color: white; border: none;" onclick="unblockUser('${ip.ipAddress}')">Unblock</button>
+                        </td>
+                    `;
+                    body.appendChild(tr);
+                });
+            }
+        } catch (error) { console.error('Error loading blocked IPs:', error); }
+    }
+
+    window.blockUser = async function(ipAddress) {
+        if (!confirm(`Are you sure you want to block ${ipAddress}?`)) return;
+        const authString = sessionStorage.getItem('adminAuth');
+        try {
+            const res = await fetch(`${API_BASE_URL}/block-ip`, {
+                method: 'POST',
+                headers: { 'Authorization': authString, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ipAddress: ipAddress, reason: 'Manual block by admin' })
+            });
+            if (res.ok) {
+                loadRecentUsers(authString);
+                loadRateLimitedUsers(authString);
+                loadBlockedIps(authString);
+            }
+        } catch (error) { console.error('Error blocking user:', error); }
+    };
+
+    window.unblockUser = async function(ipAddress) {
+        if (!confirm(`Are you sure you want to unblock ${ipAddress}?`)) return;
+        const authString = sessionStorage.getItem('adminAuth');
+        try {
+            const res = await fetch(`${API_BASE_URL}/unblock-ip`, {
+                method: 'POST',
+                headers: { 'Authorization': authString, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ipAddress: ipAddress })
+            });
+            if (res.ok) {
+                loadRecentUsers(authString);
+                loadRateLimitedUsers(authString);
+                loadBlockedIps(authString);
+            }
+        } catch (error) { console.error('Error unblocking user:', error); }
+    };
 });

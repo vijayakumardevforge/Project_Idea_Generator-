@@ -12,4 +12,6 @@ import lombok.NoArgsConstructor;
 public class DashboardStats {
     private long totalUsersToday;
     private long totalIdeasToday;
+    private long totalUsers;
+    private long totalIdeas;
 }

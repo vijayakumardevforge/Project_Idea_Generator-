@@ -88,6 +88,15 @@
                     <div class="sidebar-link" data-tab="tab-feedback">
                         <i class="fa-solid fa-comment-dots"></i> User Feedback
                     </div>
+                    <div class="sidebar-link" data-tab="tab-recent-users">
+                        <i class="fa-solid fa-users-viewfinder"></i> Top Users
+                    </div>
+                    <div class="sidebar-link" data-tab="tab-rate-limited">
+                        <i class="fa-solid fa-hand-paper"></i> Limit Reached
+                    </div>
+                    <div class="sidebar-link" data-tab="tab-blocked-ips">
+                        <i class="fa-solid fa-ban"></i> Blocked IPs
+                    </div>
                     <div class="sidebar-link" data-tab="tab-logins">
                         <i class="fa-solid fa-shield-halved"></i> Failed Logins
                     </div>
@@ -97,8 +106,9 @@
                 <div class="admin-main-content">
                     <!-- Overview Tab -->
                     <div id="tab-overview" class="dashboard-tab active">
-                        <h2 style="margin-bottom: 1.5rem; color: var(--text-main); font-family: var(--font-heading);">Daily Statistics</h2>
-                        <div id="stats-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+                        <h2 style="margin-bottom: 1.5rem; color: var(--text-main); font-family: var(--font-heading);">Statistics Overview</h2>
+                        <div id="stats-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+                            <!-- Daily Unique Users -->
                             <div class="neon-card" style="padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
                                 <div style="font-size: 3rem; color: #8b5cf6;"><i class="fa-solid fa-users"></i></div>
                                 <div>
@@ -106,11 +116,50 @@
                                     <div id="stat-users" style="font-size: 2.5rem; font-weight: 700; color: white;">...</div>
                                 </div>
                             </div>
+                            <!-- Daily Ideas -->
                             <div class="neon-card" style="padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
                                 <div style="font-size: 3rem; color: #ec4899;"><i class="fa-solid fa-lightbulb"></i></div>
                                 <div>
                                     <div style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Ideas Generated Today</div>
                                     <div id="stat-ideas" style="font-size: 2.5rem; font-weight: 700; color: white;">...</div>
+                                </div>
+                            </div>
+                            <!-- Total Unique Users -->
+                            <div class="neon-card" style="padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
+                                <div style="font-size: 3rem; color: #3b82f6;"><i class="fa-solid fa-users-viewfinder"></i></div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Total Unique Users</div>
+                                    <div id="stat-total-users" style="font-size: 2.5rem; font-weight: 700; color: white;">...</div>
+                                </div>
+                            </div>
+                            <!-- Total Ideas -->
+                            <div class="neon-card" style="padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
+                                <div style="font-size: 3rem; color: #10b981;"><i class="fa-solid fa-bolt"></i></div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Total Ideas Generated</div>
+                                    <div id="stat-total-ideas" style="font-size: 2.5rem; font-weight: 700; color: white;">...</div>
+                                </div>
+                            </div>
+                            <!-- API Usage: Ideas -->
+                            <div class="neon-card" style="padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
+                                <div style="font-size: 3rem; color: #f59e0b;"><i class="fa-solid fa-microchip"></i></div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Idea API Calls</div>
+                                    <div style="font-size: 2.5rem; font-weight: 700; color: white;">
+                                        <span id="stat-idea-api-today">...</span> <span style="font-size: 1rem; color: var(--text-muted);">today</span>
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Month: <span id="stat-idea-api-month">...</span></div>
+                                </div>
+                            </div>
+                            <!-- API Usage: Roadmaps -->
+                            <div class="neon-card" style="padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
+                                <div style="font-size: 3rem; color: #06b6d4;"><i class="fa-solid fa-code-branch"></i></div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Roadmap API Calls</div>
+                                    <div style="font-size: 2.5rem; font-weight: 700; color: white;">
+                                        <span id="stat-roadmap-api-today">...</span> <span style="font-size: 1rem; color: var(--text-muted);">today</span>
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Month: <span id="stat-roadmap-api-month">...</span></div>
                                 </div>
                             </div>
                         </div>
@@ -139,6 +188,68 @@
                         </div>
                     </div>
 
+                    <!-- Recent Users Tab -->
+                    <div id="tab-recent-users" class="dashboard-tab">
+                        <h2 style="margin-bottom: 1.5rem; color: var(--text-main); font-family: var(--font-heading);">Top Users (By Volume)</h2>
+                        <div class="glass table-container" style="overflow-x: auto; margin-bottom: 3rem;">
+                            <table class="admin-table" id="recent-users-table">
+                                <thead>
+                                    <tr>
+                                        <th>IP Address</th>
+                                        <th>Device / User Agent</th>
+                                        <th>Total Ideas</th>
+                                        <th>Last Active</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-users-body">
+                                    <!-- Recent users will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Limit Reached Users Tab -->
+                    <div id="tab-rate-limited" class="dashboard-tab">
+                        <h2 style="margin-bottom: 1.5rem; color: var(--text-main); font-family: var(--font-heading);"><i class="fa-solid fa-hand-paper" style="color: #f59e0b;"></i> Rate Limited Users</h2>
+                        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">These users have hit the daily generation limit (15 ideas) today.</p>
+                        <div class="glass table-container" style="overflow-x: auto; margin-bottom: 3rem;">
+                            <table class="admin-table" id="rate-limited-table">
+                                <thead>
+                                    <tr>
+                                        <th>IP Address</th>
+                                        <th>Device / User Agent</th>
+                                        <th>Hit Limit At</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rate-limited-body">
+                                    <!-- Rate limited users will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Blocked IPs Tab -->
+                    <div id="tab-blocked-ips" class="dashboard-tab">
+                        <h2 style="margin-bottom: 1.5rem; color: var(--text-main); font-family: var(--font-heading);"><i class="fa-solid fa-ban" style="color: #ef4444;"></i> Blocked IP Addresses</h2>
+                        <div class="glass table-container" style="overflow-x: auto; border: 1px solid rgba(239, 68, 68, 0.2); margin-bottom: 3rem;">
+                            <table class="admin-table" id="blocked-ips-table">
+                                <thead>
+                                    <tr>
+                                        <th>IP Address</th>
+                                        <th>Reason</th>
+                                        <th>Blocked Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="blocked-ips-body">
+                                    <!-- Blocked IPs will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                     <!-- Failed Logins Tab -->
                     <div id="tab-logins" class="dashboard-tab">
                         <h2 style="margin-bottom: 1.5rem; color: var(--text-main); font-family: var(--font-heading);"><i class="fa-solid fa-shield-halved" style="color: #ef4444;"></i> Failed Login Attempts</h2>
@@ -149,9 +260,10 @@
                                         <th>Date & Time</th>
                                         <th>Username Attempted</th>
                                         <th>IP Address</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
-                                <tbody id="failed-login-body">
+                                <tbody id="failed-logins-body">
                                     <!-- Failed logins will be injected here -->
                                 </tbody>
                             </table>

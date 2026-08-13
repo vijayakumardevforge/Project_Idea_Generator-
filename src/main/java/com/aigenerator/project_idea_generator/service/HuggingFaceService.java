@@ -24,6 +24,7 @@ public class HuggingFaceService {
     private static final Logger log = LoggerFactory.getLogger(HuggingFaceService.class);
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
+    private final AdminFeatureService adminFeatureService;
 
     @Value("${huggingface.api.url}")
     private String apiUrl;
@@ -34,9 +35,10 @@ public class HuggingFaceService {
     @Value("${huggingface.api.token.roadmap}")
     private String apiTokenRoadmap;
 
-    public HuggingFaceService() {
+    public HuggingFaceService(AdminFeatureService adminFeatureService) {
         this.restClient = RestClient.create();
         this.objectMapper = new ObjectMapper();
+        this.adminFeatureService = adminFeatureService;
     }
 
     public GeneratedIdea parseAndGenerateIdea(ProjectGenerationRequest request) {
@@ -63,6 +65,7 @@ public class HuggingFaceService {
         for (int attempt = 1; attempt <= maxRetries; attempt++) {
             try {
                 log.info("Sending request to Hugging Face API (Attempt {}/{})", attempt, maxRetries);
+                adminFeatureService.recordApiCall("IDEA");
                 byte[] responseBytes = restClient.post()
                         .uri(apiUrl)
                         .header("Authorization", "Bearer " + apiTokenIdea)
@@ -106,6 +109,7 @@ public class HuggingFaceService {
         for (int attempt = 1; attempt <= maxRetries; attempt++) {
             try {
                 log.info("Sending roadmap request to Hugging Face API (Attempt {}/{})", attempt, maxRetries);
+                adminFeatureService.recordApiCall("ROADMAP");
                 byte[] responseBytes = restClient.post()
                         .uri(apiUrl)
                         .header("Authorization", "Bearer " + apiTokenRoadmap)
