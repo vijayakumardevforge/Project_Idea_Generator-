@@ -38,6 +38,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sidebar Navigation Logic
     const sidebarLinks = document.querySelectorAll('.sidebar-link');
     const dashboardTabs = document.querySelectorAll('.dashboard-tab');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const adminSidebar = document.querySelector('.admin-sidebar');
+
+    if (sidebarToggle && adminSidebar) {
+        sidebarToggle.addEventListener('click', () => {
+            adminSidebar.classList.toggle('show');
+        });
+    }
 
     sidebarLinks.forEach(link => {
         link.addEventListener('click', () => {
@@ -47,6 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
             link.classList.add('active');
             const targetId = link.getAttribute('data-tab');
             document.getElementById(targetId).classList.add('active');
+            
+            if (adminSidebar) {
+                adminSidebar.classList.remove('show');
+            }
         });
     });
 
