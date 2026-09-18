@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,7 +37,10 @@ public class HuggingFaceService {
     private String apiTokenRoadmap;
 
     public HuggingFaceService(AdminFeatureService adminFeatureService) {
-        this.restClient = RestClient.create();
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(10000);
+        factory.setReadTimeout(40000);
+        this.restClient = RestClient.builder().requestFactory(factory).build();
         this.objectMapper = new ObjectMapper();
         this.adminFeatureService = adminFeatureService;
     }
@@ -57,7 +61,7 @@ public class HuggingFaceService {
         String prompt = buildPrompt(request);
         
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", "Qwen/Qwen2.5-7B-Instruct");
+        requestBody.put("model", "Qwen/Qwen2.5-Coder-32B-Instruct");
         requestBody.put("temperature", 0.9);
         requestBody.put("messages", List.of(Map.of("role", "user", "content", prompt)));
 
@@ -101,7 +105,7 @@ public class HuggingFaceService {
         String prompt = buildRoadmapPrompt(idea);
         
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", "Qwen/Qwen2.5-7B-Instruct");
+        requestBody.put("model", "Qwen/Qwen2.5-Coder-32B-Instruct");
         requestBody.put("temperature", 0.7); // slightly lower temperature for more structured planning
         requestBody.put("messages", List.of(Map.of("role", "user", "content", prompt)));
 
