@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="1--SNI6nz-xheAZP3vNgLtzD2he-PhorDMk4IblywV8" />
+    <meta name="description" content="Generate custom software engineering project ideas with AI. Get tailored database schemas, API architectures, and step-by-step sprint roadmaps based on your skill level and tech stack.">
+    <meta name="keywords" content="AI project idea generator, software engineering projects, coding project ideas, project roadmap generator, programming ideas, capstone project ideas, hackathon ideas, web development projects">
+    <title>AI Project Idea Generator | Build Your Next Big Idea</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css?v=5">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+    <div class="background-animation">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <!-- Unique First-Time Entrance Animation Portal -->
+    <div id="intro-portal" class="intro-portal hidden">
+        <div class="intro-particles-container">
+            <div class="intro-particle p-1"></div>
+            <div class="intro-particle p-2"></div>
+            <div class="intro-particle p-3"></div>
+            <div class="intro-particle p-4"></div>
+            <div class="intro-particle p-5"></div>
+            <div class="intro-particle p-6"></div>
+            <div class="intro-particle p-7"></div>
+            <div class="intro-particle p-8"></div>
+        </div>
+        
+        <div class="intro-bg-grid"></div>
+        <div class="intro-radar-sweep"></div>
+
+        <div class="intro-content">
+            <div class="intro-core-wrapper">
+                <div class="intro-ring ring-outer"></div>
+                <div class="intro-ring ring-middle"></div>
+                <div class="intro-ring ring-inner"></div>
+                <div class="intro-orb">
+                    <i class="fa-solid fa-brain orb-icon"></i>
+                </div>
+                <div class="intro-core-glow"></div>
+            </div>
+
+            <div class="intro-text-sequence">
+                <div id="intro-step-1" class="intro-step active">
+                    <span class="intro-tag"><i class="fa-solid fa-microchip"></i> System Initialization</span>
+                    <h2 class="intro-heading">Waking the AI Neural Core<span class="dot-pulse">...</span></h2>
+                    <p class="intro-subtext">Synthesizing deep technological vectors</p>
+                </div>
+                <div id="intro-step-2" class="intro-step">
+                    <span class="intro-tag"><i class="fa-solid fa-network-wired"></i> Synapses Connected</span>
+                    <h2 class="intro-heading">Architecting Next-Gen Project Roadmaps</h2>
+                    <p class="intro-subtext">Matching algorithms across 50+ languages and frameworks</p>
+                </div>
+                <div id="intro-step-3" class="intro-step">
+                    <div class="intro-brand">
+                        <i class="fa-solid fa-lightbulb gradient-text"></i>
+                        <span class="gradient-text">IdeaGen AI</span>
+                    </div>
+                    <p class="intro-tagline">Spark Your Imagination. Build the Future.</p>
+                    <button id="enter-portal-btn" class="btn btn-primary enter-portal-btn">
+                        Enter Innovation Workspace
+                    </button>
+                </div>
+            </div>
+
+            <div class="intro-progress-bar-container">
+                <div id="intro-progress-bar" class="intro-progress-bar"></div>
+            </div>
+            <div id="intro-timer-label" class="intro-timer-label">Auto-entering workspace...</div>
+        </div>
+    </div>
+
+    <nav class="navbar glass">
+        <div class="container nav-content">
+            <div class="logo">
+                <i class="fa-solid fa-lightbulb gradient-text"></i>
+                <span class="gradient-text">IdeaGen AI</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" class="active" data-page="generate">Generate</a></li>
+                <li><a href="#" data-page="history">History</a></li>
+                <li id="nav-login"><a href="#" data-page="login"><i class="fa-solid fa-user"></i> Login</a></li>
+                <li id="nav-profile" class="hidden"><a href="#" data-page="profile"><i class="fa-solid fa-address-card"></i> Profile</a></li>
+                <li id="nav-admin" class="hidden"><a href="admin.html" class="admin-link"><i class="fa-solid fa-lock"></i> Admin</a></li>
+                <li id="nav-logout" class="hidden"><a href="#" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+                <li id="nav-tour"><a href="#" id="start-tour-link" title="Interactive Step-by-Step Guide"><i class="fa-solid fa-compass"></i> Guide</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Generate View -->
+        <section id="generate-view" class="view active">
+            <header class="view-header">
+                <h1 class="gradient-text">Spark Your Next Big Project</h1>
+                <p>Configure your preferences and let our AI generate a complete project roadmap tailored for you.</p>
+            </header>
+
+            <div class="glass form-container fade-in-up">
+                <form id="generate-form">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="skillLevel">Skill Level</label>
+                            <select id="skillLevel" required>
+                                <option value="" disabled selected>Select Level</option>
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate">Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="programmingLanguage">Programming Language</label>
+                            <select id="programmingLanguage" required>
+                                <option value="" disabled selected>Select Language</option>
+                                <option value="Java">Java</option>
+                                <option value="Python">Python</option>
+                                <option value="C#">C#</option>
+                                <option value="JavaScript">JavaScript</option>
+                                <option value="TypeScript">TypeScript</option>
+                                <option value="Go">Go</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="framework">Framework</label>
+                            <select id="framework" required>
+                                <option value="" disabled selected>Select Language First</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Project Topic</label>
+                            <div class="toggle-group" style="display: flex; gap: 1rem; margin-bottom: 0.75rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer; color: var(--text-light);">
+                                    <input type="radio" name="topicType" value="domain" checked style="width: auto;"> Choose Domain
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer; color: var(--text-light);">
+                                    <input type="radio" name="topicType" value="custom" style="width: auto;"> Custom Title
+                                </label>
+                            </div>
+                            
+                            <select id="projectDomain" required>
+                                <option value="" disabled selected>Select Domain</option>
+                                <option value="Education">Education</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Finance">Finance</option>
+                                <option value="E-Commerce">E-Commerce</option>
+                                <option value="AI">AI & Machine Learning</option>
+                                <option value="Productivity">Productivity</option>
+                                <option value="Entertainment">Entertainment</option>
+                            </select>
+                            
+                            <input type="text" id="customProjectTitle" placeholder="e.g., Smart Home IoT Dashboard" class="hidden" disabled style="width: 100%; padding: 0.8rem 1rem; border-radius: 0.5rem; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 0, 0, 0.2); color: var(--text-light);">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary generate-btn">
+                        <span>Generate Project Idea</span>
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Loading State -->
+            <div id="loading-state" class="loading-container hidden">
+                <div class="loader"></div>
+                <p>AI is architecting your project...</p>
+            </div>
+
+            <!-- Result View -->
+            <div id="result-container" class="glass result-container hidden fade-in-up">
+                <!-- Result content will be injected here -->
+            </div>
+        </section>
+
+        <!-- Login / Register View -->
+        <section id="login-view" class="view">
+            <header class="view-header">
+                <h1 class="gradient-text">Welcome Back</h1>
+                <p>Login to save your generated ideas and access your profile.</p>
+            </header>
+            
+            <div class="glass form-container fade-in-up" style="max-width: 450px;">
+                <div id="auth-error" class="hidden" style="color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid rgba(239, 68, 68, 0.2); text-align: center;"></div>
+                
+                <form id="login-form">
+                    <div class="input-group" style="margin-bottom: 1.5rem;">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" required placeholder="Enter your email">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 2rem;">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required placeholder="Enter your password">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1.5rem;">
+                        <i class="fa-solid fa-right-to-bracket"></i> Login
+                    </button>
+                    <div style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+                        Don't have an account? <a href="#" id="show-register" style="color: var(--primary); text-decoration: none;">Register here</a>
+                    </div>
+                </form>
+
+                <form id="register-form" class="hidden">
+                    <div class="input-group" style="margin-bottom: 1.5rem;">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" required placeholder="Enter your email">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 2rem;">
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" required placeholder="Create a password">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1.5rem;">
+                        <i class="fa-solid fa-user-plus"></i> Register
+                    </button>
+                    <div style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+                        Already have an account? <a href="#" id="show-login" style="color: var(--primary); text-decoration: none;">Login here</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Profile View -->
+        <section id="profile-view" class="view">
+            <header class="view-header">
+                <h1 class="gradient-text">Your Profile</h1>
+                <p>Welcome back! Here are the ideas you've saved.</p>
+            </header>
+
+            <div id="profile-loading" class="loading-container">
+                <div class="loader"></div>
+                <p>Loading your saved ideas...</p>
+            </div>
+
+            <div id="profile-grid" class="history-grid">
+                <!-- Saved cards will be injected here -->
+            </div>
+        </section>
+
+        <!-- History View -->
+        <section id="history-view" class="view">
+            <header class="view-header">
+                <h1 class="gradient-text">Your Generated Ideas</h1>
+                <p>Revisit your previously generated architectures from this session.</p>
+            </header>
+
+            <div id="history-loading" class="loading-container">
+                <div class="loader"></div>
+                <p>Fetching history...</p>
+            </div>
+
+            <div id="history-grid" class="history-grid">
+                <!-- History cards will be injected here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Template for Result and History Details -->
+    <template id="project-details-template">
+        <div class="project-details">
+            <div class="tags">
+                <span class="tag skill-tag"></span>
+                <span class="tag lang-tag"></span>
+                <span class="tag framework-tag"></span>
+                <span class="tag domain-tag"></span>
+            </div>
+            
+            <h2 class="project-name"></h2>
+            <p class="project-description"></p>
+            
+            <div class="details-grid">
+                <div class="detail-card glass-inner">
+                    <h3><i class="fa-solid fa-star"></i> Key Features</h3>
+                    <ul class="feature-list"></ul>
+                </div>
+                
+                <div class="detail-card glass-inner">
+                    <h3><i class="fa-solid fa-database"></i> Suggested Tables</h3>
+                    <ul class="tables-list"></ul>
+                </div>
+                
+                <div class="detail-card glass-inner">
+                    <h3><i class="fa-solid fa-network-wired"></i> Key APIs / Endpoints</h3>
+                    <ul class="api-list"></ul>
+                </div>
+                
+                <div class="detail-card glass-inner">
+                    <h3><i class="fa-solid fa-map-location-dot"></i> Learning Roadmap</h3>
+                    <ul class="roadmap-list"></ul>
+                </div>
+            </div>
+            
+            <div class="detailed-roadmap-container hidden" style="margin-top: 2rem;">
+                <h3 class="gradient-text"><i class="fa-solid fa-list-check"></i> Step-by-Step Implementation Plan</h3>
+                <div class="roadmap-content glass-inner" style="margin-top: 1rem; padding: 1.5rem; text-align: left; line-height: 1.6;">
+                    <!-- Markdown roadmap will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Floating Feedback Button -->
+    <button id="floating-feedback-btn" class="floating-btn">
+        <i class="fa-solid fa-comment"></i> Feedback
+    </button>
+
+    <!-- Feedback Modal -->
+    <div id="feedback-modal" class="modal hidden">
+        <div class="modal-content neon-card fade-in-up">
+            <span class="close-modal">&times;</span>
+            <h2 class="neon-title" style="margin-bottom: 0.5rem; font-size: 1.8rem;"><i class="fa-solid fa-comment-dots"></i> Feedback</h2>
+            <p style="text-align: center; margin-bottom: 1.5rem; color: var(--text-muted);">How was your experience generating ideas?</p>
+            <form id="feedback-form">
+                <div class="star-rating" id="star-rating" style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 2rem; font-size: 2rem; cursor: pointer;">
+                    <i class="fa-regular fa-star" data-rating="1"></i>
+                    <i class="fa-regular fa-star" data-rating="2"></i>
+                    <i class="fa-regular fa-star" data-rating="3"></i>
+                    <i class="fa-regular fa-star" data-rating="4"></i>
+                    <i class="fa-regular fa-star" data-rating="5"></i>
+                </div>
+                <input type="hidden" id="rating-value" value="0" required>
+                <div class="input-group" style="margin-bottom: 1.5rem;">
+                    <label for="feedback-email" class="neon-label">Your Email</label>
+                    <input type="email" id="feedback-email" class="neon-input" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 2rem;">
+                    <label for="feedback-message" class="neon-label">Your Thoughts</label>
+                    <textarea id="feedback-message" class="neon-input" rows="4" required style="resize: vertical;"></textarea>
+                </div>
+                <button type="submit" class="neon-btn" style="width: 100%;">Submit Feedback</button>
+            </form>
+            <div id="feedback-success" class="hidden" style="color: #10b981; margin-top: 1.5rem; text-align: center; font-weight: 500;">
+                <i class="fa-solid fa-circle-check"></i> Thank you for your feedback!
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Step-by-Step Onboarding Walkthrough Tour -->
+    <div id="onboarding-tour-overlay" class="tour-overlay hidden">
+        <div class="tour-card neon-card fade-in-up">
+            <div class="tour-header">
+                <div class="tour-badge"><i class="fa-solid fa-compass"></i> Interactive Guide</div>
+                <span id="tour-step-indicator" class="tour-step-indicator">Step 1 of 5</span>
+                <span class="close-tour">&times;</span>
+            </div>
+
+            <div class="tour-body">
+                <h2 id="tour-title" class="tour-title">Welcome to IdeaGen AI</h2>
+                <p id="tour-description" class="tour-description">
+                    Your personal AI system architect. Let's take a quick walkthrough of how you can generate full project roadmaps and database schemas.
+                </p>
+                <div id="tour-visual" class="tour-visual"></div>
+            </div>
+
+            <div class="tour-footer">
+                <div class="tour-dots" id="tour-dots">
+                    <span class="tour-dot active" data-step="0"></span>
+                    <span class="tour-dot" data-step="1"></span>
+                    <span class="tour-dot" data-step="2"></span>
+                    <span class="tour-dot" data-step="3"></span>
+                    <span class="tour-dot" data-step="4"></span>
+                </div>
+                <div class="tour-actions">
+                    <button id="tour-prev-btn" class="btn btn-secondary tour-btn hidden"><i class="fa-solid fa-arrow-left"></i> Prev</button>
+                    <button id="tour-next-btn" class="btn btn-primary tour-btn">Next Step <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="site-footer">
+        <p>Built with ❤️ by Vijayakumar</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="js/app.js?v=4"></script>
+</body>
+</html>

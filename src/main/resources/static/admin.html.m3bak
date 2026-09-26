@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - IdeaGen AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <style>
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+        .admin-table th, .admin-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .admin-table th {
+            font-weight: 600;
+            color: var(--text-light);
+        }
+        .admin-table td {
+            color: var(--text-muted);
+        }
+        .stars-display {
+            color: #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-pro-bg">
+        <div class="pro-particle"></div>
+        <div class="pro-particle"></div>
+        <div class="pro-particle"></div>
+    </div>
+
+    <nav class="navbar glass">
+        <div class="container nav-content">
+            <div class="logo">
+                <i class="fa-solid fa-lock gradient-text"></i>
+                <span class="gradient-text">Admin Panel</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html"><i class="fa-solid fa-arrow-left"></i> Back to App</a></li>
+                <li><a href="#" id="logout-btn" class="hidden"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Login Section -->
+        <section id="login-section" class="neon-card fade-in-up" style="max-width: 400px; margin: 6rem auto;">
+            <h2 class="neon-title">Admin Login</h2>
+            <form id="admin-login-form">
+                <div class="input-group" style="margin-bottom: 1.5rem;">
+                    <label for="username" class="neon-label">Username</label>
+                    <input type="text" id="username" class="neon-input" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 2rem;">
+                    <label for="password" class="neon-label">Password</label>
+                    <input type="password" id="password" class="neon-input" required>
+                </div>
+                <button type="submit" class="neon-btn" style="width: 100%;">Login</button>
+                <div id="login-error" class="hidden" style="color: #ef4444; margin-top: 1rem; text-align: center;">
+                    Invalid credentials
+                </div>
+            </form>
+        </section>
+
+        <!-- Admin Dashboard Section -->
+        <section id="dashboard-section" class="hidden fade-in-up">
+            <header class="view-header" style="margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 1.5rem;">
+                <button id="sidebar-toggle" class="neon-btn" style="padding: 0.5rem 1rem; font-size: 1rem !important;"><i class="fa-solid fa-bars"></i> Menu</button>
+                <h1 class="gradient-text" style="margin: 0;">Admin Dashboard</h1>
+            </header>
+
+            <div class="dashboard-layout">
+                <!-- Left Sidebar -->
+                <aside class="admin-sidebar">
+                    <div class="sidebar-link active" data-tab="tab-overview">
+                        <i class="fa-solid fa-chart-line"></i> Overview
+                    </div>
+                    <div class="sidebar-link" data-tab="tab-feedback">
+                        <i class="fa-solid fa-comment-dots"></i> User Feedback
+                    </div>
+                    <div class="sidebar-link" data-tab="tab-recent-users">
+                        <i class="fa-solid fa-users-viewfinder"></i> Top Users
+                    </div>
+                    <div class="sidebar-link" data-tab="tab-recent-24h">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Recent Activity (24h)
+                    </div>
+                    <div class="sidebar-link" data-tab="tab-rate-limited">
+                        <i class="fa-solid fa-hand-paper"></i> Limit Reached
+                    </div>
+                    <div class="sidebar-link" data-tab="tab-blocked-ips">
+                        <i class="fa-solid fa-ban"></i> Blocked IPs
+                    </div>
+                    <div class="sidebar-link" data-tab="tab-logins">
+                        <i class="fa-solid fa-shield-halved"></i> Failed Logins
+                    </div>
+                </aside>
+
+                <!-- Main Content -->
+                <div class="admin-main-content">
+                    <!-- Overview Tab -->
+                    <div id="tab-overview" class="dashboard-tab active">
+                        <h2 style="margin-bottom: 1.5rem; color: var(--text-main); font-family: var(--font-heading);">Statistics Overview</h2>
+                        <div id="stats-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+                            <!-- Daily Unique Users -->
+                            <div class="neon-card" style="padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
+                                <div style="font-size: 3rem; color: #8b5cf6;"><i class="fa-solid fa-users"></i></div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Unique Users Today</div>
+                                    <div id="stat-users" style="font-size: 2.5rem; font-weight: 700; color: white;">...</div>
+                                </div>
+                            </div>
+                            <!-- Daily Ideas -->
+                            <div class="neon-card" style="padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
+                                <div style="font-size: 3rem; color: #ec4899;"><i class="fa-solid fa-lightbulb"></i></div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Ideas Generated Today</div>
+                                    <div id="stat-ideas" style="font-size: 2.5rem; font-weight: 700; color: white;">...</div>
+                                </div>
+                            </div>
+                            <!-- Total Unique Users -->
+                            <div class="neon-card" style="padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
+                                <div style="font-size: 3rem; color: #3b82f6;"><i class="fa-solid fa-users-viewfinder"></i></div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Total Unique Users</div>
+                                    <div id="stat-total-users" style="font-size: 2.5rem; font-weight: 700; color: white;">...</div>
+                                </div>
+                            </div>
+                            <!-- Total Ideas -->
+                            <div class="neon-card" style="padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
+                                <div style="font-size: 3rem; color: #10b981;"><i class="fa-solid fa-bolt"></i></div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Total Ideas Generated</div>
+                                    <div id="stat-total-ideas" style="font-size: 2.5rem; font-weight: 700; color: white;">...</div>
+                                </div>
+                            </div>
+                            <!-- API Usage: Ideas -->
+                            <div class="neon-card" style="padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
+                                <div style="font-size: 3rem; color: #f59e0b;"><i class="fa-solid fa-microchip"></i></div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Idea API Calls</div>
+                                    <div style="font-size: 2.5rem; font-weight: 700; color: white;">
+                                        <span id="stat-idea-api-today">...</span> <span style="font-size: 1rem; color: var(--text-muted);">today</span>
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Month: <span id="stat-idea-api-month">...</span></div>
+                                </div>
+                            </div>
+                            <!-- API Usage: Roadmaps -->
+                            <div class="neon-card" style="padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
+                                <div style="font-size: 3rem; color: #06b6d4;"><i class="fa-solid fa-code-branch"></i></div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Roadmap API Calls</div>
+                                    <div style="font-size: 2.5rem; font-weight: 700; color: white;">
+                                        <span id="stat-roadmap-api-today">...</span> <span style="font-size: 1rem; color: var(--text-muted);">today</span>
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Month: <span id="stat-roadmap-api-month">...</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feedback Tab -->
+                    <div id="tab-feedback" class="dashboard-tab">
+                        <h2 style="margin-bottom: 1.5rem; color: var(--text-main); font-family: var(--font-heading);">
+                            User Feedback 
+                            <span id="recent-feedback-summary" style="font-size: 0.9rem; color: var(--text-muted); font-weight: normal; margin-left: 1rem;"></span>
+                        </h2>
+                        <div class="glass table-container" style="overflow-x: auto; margin-bottom: 3rem;">
+                            <table class="admin-table" id="feedback-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Email</th>
+                                        <th>Rating</th>
+                                        <th>Message</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="feedback-body">
+                                    <!-- Feedback will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Recent Users Tab -->
+                    <div id="tab-recent-users" class="dashboard-tab">
+                        <h2 style="margin-bottom: 1.5rem; color: var(--text-main); font-family: var(--font-heading);">Top Users (By Volume)</h2>
+                        <div class="glass table-container" style="overflow-x: auto; margin-bottom: 3rem;">
+                            <table class="admin-table" id="recent-users-table">
+                                <thead>
+                                    <tr>
+                                        <th>IP Address</th>
+                                        <th>Device / User Agent</th>
+                                        <th>Total Ideas</th>
+                                        <th>Last Active</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-users-body">
+                                    <!-- Recent users will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity (24h) Tab -->
+                    <div id="tab-recent-24h" class="dashboard-tab">
+                        <h2 style="margin-bottom: 1.5rem; color: var(--text-main); font-family: var(--font-heading);"><i class="fa-solid fa-clock-rotate-left" style="color: #3b82f6;"></i> Recent Activity (24h)</h2>
+                        <div class="glass table-container" style="overflow-x: auto; margin-bottom: 3rem;">
+                            <table class="admin-table" id="recent-24h-table">
+                                <thead>
+                                    <tr>
+                                        <th>IP Address</th>
+                                        <th>Device / User Agent</th>
+                                        <th>Last Active</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-24h-body">
+                                    <!-- 24h users will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Limit Reached Users Tab -->
+                    <div id="tab-rate-limited" class="dashboard-tab">
+                        <h2 style="margin-bottom: 1.5rem; color: var(--text-main); font-family: var(--font-heading);"><i class="fa-solid fa-hand-paper" style="color: #f59e0b;"></i> Rate Limited Users</h2>
+                        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">These users have hit the daily generation limit (15 ideas) today.</p>
+                        <div class="glass table-container" style="overflow-x: auto; margin-bottom: 3rem;">
+                            <table class="admin-table" id="rate-limited-table">
+                                <thead>
+                                    <tr>
+                                        <th>IP Address</th>
+                                        <th>Device / User Agent</th>
+                                        <th>Hit Limit At</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rate-limited-body">
+                                    <!-- Rate limited users will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Blocked IPs Tab -->
+                    <div id="tab-blocked-ips" class="dashboard-tab">
+                        <h2 style="margin-bottom: 1.5rem; color: var(--text-main); font-family: var(--font-heading);"><i class="fa-solid fa-ban" style="color: #ef4444;"></i> Blocked IP Addresses</h2>
+                        <div class="glass table-container" style="overflow-x: auto; border: 1px solid rgba(239, 68, 68, 0.2); margin-bottom: 3rem;">
+                            <table class="admin-table" id="blocked-ips-table">
+                                <thead>
+                                    <tr>
+                                        <th>IP Address</th>
+                                        <th>Device / User Agent</th>
+                                        <th>Reason</th>
+                                        <th>Blocked Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="blocked-ips-body">
+                                    <!-- Blocked IPs will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Failed Logins Tab -->
+                    <div id="tab-logins" class="dashboard-tab">
+                        <h2 style="margin-bottom: 1.5rem; color: var(--text-main); font-family: var(--font-heading);"><i class="fa-solid fa-shield-halved" style="color: #ef4444;"></i> Failed Login Attempts</h2>
+                        <div class="glass table-container" style="overflow-x: auto; border: 1px solid rgba(239, 68, 68, 0.2);">
+                            <table class="admin-table" id="failed-login-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date & Time</th>
+                                        <th>Username Attempted</th>
+                                        <th>IP Address</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="failed-logins-body">
+                                    <!-- Failed logins will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

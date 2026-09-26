@@ -34,3 +34,6 @@ build/
 
 ### Secrets ###
 application-secrets.properties
+
+### Custom Designs ###
+designs/

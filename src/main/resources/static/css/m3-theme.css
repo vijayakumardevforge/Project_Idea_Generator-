@@ -1,0 +1,257 @@
+/* Material Design 3 Theme Variables */
+:root {
+  /* Tonal Palettes - Deep Purple/Indigo inspired by IdeaGen */
+  --md-sys-color-primary: #65558F;
+  --md-sys-color-on-primary: #FFFFFF;
+  --md-sys-color-primary-container: #EADDFF;
+  --md-sys-color-on-primary-container: #21005D;
+  
+  --md-sys-color-secondary: #625B71;
+  --md-sys-color-on-secondary: #FFFFFF;
+  --md-sys-color-secondary-container: #E8DEF8;
+  --md-sys-color-on-secondary-container: #1D192B;
+  
+  --md-sys-color-tertiary: #7D5260;
+  --md-sys-color-on-tertiary: #FFFFFF;
+  --md-sys-color-tertiary-container: #FFD8E4;
+  --md-sys-color-on-tertiary-container: #31111D;
+  
+  --md-sys-color-error: #B3261E;
+  --md-sys-color-on-error: #FFFFFF;
+  --md-sys-color-error-container: #F9DEDC;
+  --md-sys-color-on-error-container: #410E0B;
+  
+  /* Surfaces & Backgrounds - Dark Theme (since original app is dark) */
+  --md-sys-color-background: #141218;
+  --md-sys-color-on-background: #E6E0E9;
+  
+  --md-sys-color-surface: #141218;
+  --md-sys-color-on-surface: #E6E0E9;
+  --md-sys-color-surface-variant: #49454F;
+  --md-sys-color-on-surface-variant: #CAC4D0;
+  
+  --md-sys-color-outline: #938F99;
+  --md-sys-color-outline-variant: #49454F;
+  
+  /* Surface Containers */
+  --md-sys-color-surface-container-lowest: #0F0D13;
+  --md-sys-color-surface-container-low: #1D1B20;
+  --md-sys-color-surface-container: #211F26;
+  --md-sys-color-surface-container-high: #2B2930;
+  --md-sys-color-surface-container-highest: #36343B;
+  
+  /* Elevations */
+  --md-sys-elevation-level1: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+  --md-sys-elevation-level2: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
+  --md-sys-elevation-level3: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px 0px rgba(0, 0, 0, 0.3);
+  --md-sys-elevation-level4: 0px 6px 10px 4px rgba(0, 0, 0, 0.15), 0px 2px 3px 0px rgba(0, 0, 0, 0.3);
+  --md-sys-elevation-level5: 0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3);
+  
+  /* Typography - Using system fonts / existing fonts */
+  --md-sys-typescale-display-large-font: 'Outfit', sans-serif;
+  --md-sys-typescale-display-large-size: 57px;
+  --md-sys-typescale-display-large-weight: 400;
+  
+  --md-sys-typescale-headline-large-font: 'Outfit', sans-serif;
+  --md-sys-typescale-headline-large-size: 32px;
+  --md-sys-typescale-headline-large-weight: 400;
+  
+  --md-sys-typescale-title-large-font: 'Inter', sans-serif;
+  --md-sys-typescale-title-large-size: 22px;
+  --md-sys-typescale-title-large-weight: 400;
+  
+  --md-sys-typescale-body-large-font: 'Inter', sans-serif;
+  --md-sys-typescale-body-large-size: 16px;
+  --md-sys-typescale-body-large-weight: 400;
+  
+  --md-sys-typescale-label-large-font: 'Inter', sans-serif;
+  --md-sys-typescale-label-large-size: 14px;
+  --md-sys-typescale-label-large-weight: 500;
+  
+  /* Shape */
+  --md-sys-shape-corner-none: 0px;
+  --md-sys-shape-corner-extra-small: 4px;
+  --md-sys-shape-corner-small: 8px;
+  --md-sys-shape-corner-medium: 12px;
+  --md-sys-shape-corner-large: 16px;
+  --md-sys-shape-corner-extra-large: 28px;
+  --md-sys-shape-corner-full: 9999px;
+  
+  /* Custom Overrides for Primary Gradient */
+  --md-sys-color-primary-gradient: linear-gradient(135deg, #D0BCFF 0%, #FFD8E4 100%);
+}
+
+body {
+  background-color: var(--md-sys-color-background);
+  color: var(--md-sys-color-on-background);
+  font-family: var(--md-sys-typescale-body-large-font);
+  font-size: var(--md-sys-typescale-body-large-size);
+}
+
+/* M3 Adaptive Navigation Suite */
+@media (max-width: 599px) {
+  /* Compact: Navigation Bar (Bottom) */
+  .navbar {
+    position: fixed;
+    bottom: 0;
+    top: auto;
+    width: 100%;
+    height: 80px;
+    z-index: 1000;
+    background-color: var(--md-sys-color-surface-container);
+    border-top: 1px solid var(--md-sys-color-outline-variant);
+    border-bottom: none;
+    box-shadow: var(--md-sys-elevation-level2);
+  }
+  .nav-content {
+    flex-direction: column;
+    height: 100%;
+    padding: 0;
+  }
+  .nav-content .logo {
+    display: none; /* Hide logo in bottom nav to save space */
+  }
+  .nav-links {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+  }
+  .nav-links li {
+    display: flex;
+    flex: 1;
+  }
+  .nav-links a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    font-size: 12px;
+    gap: 4px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+  .nav-links a i {
+    font-size: 24px;
+    padding: 4px 16px;
+    border-radius: 16px;
+  }
+  .nav-links a.active i {
+    background-color: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+  }
+  .nav-links a.active {
+    color: var(--md-sys-color-on-surface);
+    font-weight: 600;
+  }
+  .nav-links a.active::after {
+    display: none; /* Remove legacy underline */
+  }
+  
+  main {
+    padding-bottom: 100px !important; /* Space for bottom nav */
+  }
+}
+
+@media (min-width: 600px) and (max-width: 839px) {
+  /* Medium: Navigation Rail (Left) */
+  body {
+    display: flex;
+  }
+  .navbar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 80px;
+    height: 100vh;
+    z-index: 1000;
+    background-color: var(--md-sys-color-surface-container);
+    border-right: 1px solid var(--md-sys-color-outline-variant);
+    border-bottom: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 0;
+  }
+  .nav-content {
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+  }
+  .nav-content .logo {
+    margin-bottom: 32px;
+  }
+  .nav-content .logo span {
+    display: none;
+  }
+  .nav-links {
+    flex-direction: column;
+    gap: 24px;
+    align-items: center;
+    width: 100%;
+  }
+  .nav-links a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    gap: 4px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+  .nav-links a i {
+    font-size: 24px;
+    padding: 4px 16px;
+    border-radius: 16px;
+  }
+  .nav-links a.active i {
+    background-color: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+  }
+  .nav-links a.active {
+    color: var(--md-sys-color-on-surface);
+  }
+  .nav-links a.active::after {
+    display: none;
+  }
+  
+  main {
+    margin-left: 80px;
+    width: calc(100% - 80px);
+  }
+}
+
+@media (min-width: 840px) {
+  /* Expanded: Top App Bar or Navigation Drawer */
+  /* Here we'll treat it as a Top App Bar as it works best for this layout without rewriting the HTML heavily */
+  .navbar {
+    height: 64px;
+    background-color: var(--md-sys-color-surface-container);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  }
+  .nav-content {
+    height: 100%;
+  }
+  .nav-links {
+    gap: 8px;
+  }
+  .nav-links a {
+    padding: 12px 16px;
+    border-radius: 24px;
+    transition: background-color 0.2s;
+  }
+  .nav-links a:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+  .nav-links a.active {
+    background-color: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+  }
+  .nav-links a.active::after {
+    display: none; /* Remove old active underline */
+  }
+}
