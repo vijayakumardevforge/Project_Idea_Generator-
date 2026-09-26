@@ -2013,7 +2013,7 @@ select option {
 }
 
 .tour-description strong {
-  color: #38bdf8;
+  color: #5e6677 !important;
   font-weight: 700;
 }
 
@@ -2321,6 +2321,11 @@ body {
     text-shadow: none !important;
 }
 
+.floating-btn, .neon-btn {
+    background-image: none !important;
+    background: #e0e0e0 !important;
+}
+
 .btn::before, .btn-primary::before, .btn-secondary::before {
     display: none !important; /* Remove gradient sweeps */
 }
@@ -2334,7 +2339,7 @@ body {
 }
 
 /* Text Box Design (Inputs, Selects, Textareas) */
-input:not([type="radio"]):not([type="checkbox"]), select, textarea {
+input:not([type="radio"]):not([type="checkbox"]), select, textarea, .neon-input {
     min-height: 40px !important;
     padding: 10px !important;
     font-family: 'Courier New', Courier, monospace !important;
@@ -2347,7 +2352,7 @@ input:not([type="radio"]):not([type="checkbox"]), select, textarea {
     color: var(--text-main) !important;
 }
 
-input:not([type="radio"]):not([type="checkbox"]):focus, select:focus, textarea:focus {
+input:not([type="radio"]):not([type="checkbox"]):focus, select:focus, textarea:focus, .neon-input:focus {
     background: #e8e8e8 !important;
     box-shadow: inset 5px 5px 17px #c8c8c8, inset -5px -5px 17px #ffffff !important;
 }
@@ -2499,7 +2504,7 @@ p, .text-muted, label, .intro-subtext, .intro-tagline {
   border-radius: 10px;
   background-color: #ffffff2b;
   box-shadow: rgba(0, 0, 0, 0.62) 0px 0px 5px inset, rgba(0, 0, 0, 0.21) 0px 0px 0px 24px inset,
-        #22cc3f 0px 0px 0px 0px inset, rgba(224, 224, 224, 0.45) 0px 1px 0px 0px;
+        var(--primary) 0px 0px 0px 0px inset, rgba(224, 224, 224, 0.45) 0px 1px 0px 0px;
   cursor: pointer;
   position: relative;
 }
@@ -2519,8 +2524,8 @@ p, .text-muted, label, .intro-subtext, .intro-tagline {
 }
 
 .checkbox input:checked + .checkmark {
-  background-color: #22cc3f;
-  box-shadow: rgba(0, 0, 0, 0.62) 0px 0px 5px inset, #22cc3f 0px 0px 0px 2px inset, #22cc3f 0px 0px 0px 24px inset,
+  background-color: var(--primary);
+  box-shadow: rgba(0, 0, 0, 0.62) 0px 0px 5px inset, var(--primary) 0px 0px 0px 2px inset, var(--primary) 0px 0px 0px 24px inset,
         rgba(224, 224, 224, 0.45) 0px 1px 0px 0px;
 }
 
@@ -2717,3 +2722,273 @@ label, .label-text {
     margin-bottom: 6px !important;
 }
 
+/* Custom Select Dropdown UI */
+.custom-select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.custom-select-display {
+    min-height: 40px !important;
+    padding: 10px 15px !important;
+    background: #e8e8e8 !important;
+    box-shadow: 5px 5px 17px #c8c8c8, -5px -5px 17px #ffffff !important;
+    border-radius: 10px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 14px !important;
+    color: #2B303A !important;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all .5s !important;
+}
+
+.custom-select-display.open {
+    box-shadow: inset 5px 5px 17px #c8c8c8, inset -5px -5px 17px #ffffff !important;
+}
+
+.custom-select-display i {
+    transition: transform 0.3s ease;
+    color: #5A626A !important;
+}
+.custom-select-display.open i {
+    transform: rotate(180deg);
+}
+
+.custom-select-options {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    right: 0;
+    background: #e8e8e8 !important;
+    border-radius: 10px !important;
+    box-shadow: 5px 5px 17px #c8c8c8, -5px -5px 17px #ffffff !important;
+    z-index: 100;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.custom-select-options.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.custom-option {
+    padding: 12px 15px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 14px !important;
+    color: #2B303A !important;
+    cursor: pointer;
+    transition: background 0.2s ease !important;
+}
+
+.custom-option:hover {
+    background: #c8c8c8 !important;
+}
+
+.custom-option.selected {
+    background: #d1d5db !important;
+    font-weight: 600 !important;
+}
+
+.custom-option.disabled {
+    color: #A0AAB5 !important;
+    cursor: not-allowed;
+    background: transparent !important;
+}
+.custom-option.disabled:hover {
+    background: transparent !important;
+}
+
+/* Custom Scrollbar for dropdown */
+.custom-select-options::-webkit-scrollbar {
+    width: 8px;
+}
+.custom-select-options::-webkit-scrollbar-track {
+    background: #e8e8e8;
+    border-radius: 10px;
+}
+.custom-select-options::-webkit-scrollbar-thumb {
+    background: #bcbcbc;
+    border-radius: 10px;
+}
+
+/* Neumorphic Active Nav Selection */
+.nav-links a.active {
+    background: #e8e8e8 !important;
+    box-shadow: inset 5px 5px 17px #c8c8c8, inset -5px -5px 17px #ffffff !important;
+    border-radius: 20px !important;
+    color: #2B303A !important;
+    padding: 8px 16px !important;
+    font-weight: 600 !important;
+}
+
+.nav-links a.active::after {
+    display: none !important;
+}
+
+.nav-links a {
+    padding: 8px 16px !important;
+    border-radius: 20px !important;
+    transition: all 0.3s ease !important;
+}
+
+.nav-links a:hover:not(.active) {
+    box-shadow: 5px 5px 17px #c8c8c8, -5px -5px 17px #ffffff !important;
+    background: #e8e8e8 !important;
+    color: #2B303A !important;
+}
+
+/* Fix login icon overlap */
+#login-form .field input, 
+#register-form .field input {
+    padding-left: 50px !important;
+}
+
+/* Animated Sparkle Button */
+.sparkle-button {
+  --black-700: hsla(0 0% 12% / 1);
+  --border_radius: 9999px;
+  --transtion: 0.3s ease-in-out;
+  --offset: 2px;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transform-origin: center;
+  padding: 1rem 2rem;
+  background-color: transparent;
+  border: none;
+  border-radius: var(--border_radius);
+  transform: translateY(calc(var(--active, 0) * -2px));
+  transition: transform var(--transtion), box-shadow var(--transtion);
+  margin: 0 auto;
+}
+.sparkle-button::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  background-color: var(--black-700);
+  border-radius: var(--border_radius);
+  box-shadow: inset 0 0.5px hsl(0, 0%, 100%), inset 0 -1px 2px 0 hsl(0, 0%, 0%),
+    0px 4px 15px 0px hsla(0 0% 0% / calc(1 - var(--active, 0)));
+  transition: all var(--transtion);
+  z-index: 0;
+}
+.sparkle-button::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  /* Removed purple gradient color change */
+  display: none;
+  opacity: 0;
+  border-radius: var(--border_radius);
+  transition: opacity var(--transtion);
+  z-index: 2;
+}
+.sparkle-button:is(:hover, :focus-visible) {
+  --active: 1;
+}
+.sparkle-button:active {
+  transform: scale(1);
+}
+.sparkle-button .dots_border {
+  --size_border: calc(100% + 2px);
+  overflow: hidden;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: var(--size_border);
+  height: var(--size_border);
+  background-color: transparent;
+  border-radius: var(--border_radius);
+  z-index: -10;
+}
+.sparkle-button .dots_border::before {
+  content: "";
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transform-origin: left;
+  transform: rotate(0deg);
+  width: 100%;
+  height: 2rem;
+  background-color: white;
+  mask: linear-gradient(transparent 0%, white 120%);
+  -webkit-mask: linear-gradient(transparent 0%, white 120%);
+  animation: rotate 2s linear infinite;
+}
+@keyframes rotate {
+  to { transform: rotate(360deg); }
+}
+.sparkle-button .sparkle {
+  position: relative;
+  z-index: 10;
+  width: 1.75rem;
+}
+.sparkle-button .sparkle .path {
+  fill: currentColor;
+  stroke: currentColor;
+  transform-origin: center;
+  color: hsl(0, 0%, 100%);
+}
+.sparkle-button:is(:hover, :focus) .sparkle .path {
+  animation: path 1.5s linear 0.5s infinite;
+}
+.sparkle-button .sparkle .path:nth-child(1) { --scale_path_1: 1.2; }
+.sparkle-button .sparkle .path:nth-child(2) { --scale_path_2: 1.2; }
+.sparkle-button .sparkle .path:nth-child(3) { --scale_path_3: 1.2; }
+@keyframes path {
+  0%, 34%, 71%, 100% { transform: scale(1); }
+  17% { transform: scale(var(--scale_path_1, 1)); }
+  49% { transform: scale(var(--scale_path_2, 1)); }
+  83% { transform: scale(var(--scale_path_3, 1)); }
+}
+.sparkle-button .text_button {
+  position: relative;
+  z-index: 10;
+  background-image: linear-gradient(90deg, hsla(0 0% 100% / 1) 0%, hsla(0 0% 100% / var(--active, 0)) 120%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  font-size: 1rem;
+  color: transparent;
+  font-weight: 600;
+}
+
+/* Tour Popup Neumorphism Overrides */
+.tour-card.neon-card {
+    box-shadow: 10px 10px 30px rgba(0,0,0,0.1), -10px -10px 30px rgba(255,255,255,0.7) !important;
+    border: 1px solid #ffffff !important;
+}
+.tour-card h2, .tour-card p {
+    color: #5e6677 !important;
+    text-shadow: none !important;
+}
+.tour-visual {
+    background: #e8e8e8 !important;
+    box-shadow: inset 5px 5px 10px rgba(0,0,0,0.05), inset -5px -5px 10px rgba(255,255,255,0.8) !important;
+    border: none !important;
+    color: #5e6677 !important;
+}
+.tour-visual i {
+    color: #6366f1 !important;
+    filter: none !important;
+}

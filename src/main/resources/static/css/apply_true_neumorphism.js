@@ -26,6 +26,7 @@ input, select, textarea {
     box-shadow: inset 6px 6px 12px #4a5160, inset -6px -6px 12px #727b8e !important;
     color: #5e6677 !important;
     border-radius: 12px !important;
+    padding-left: 50px !important;
 }
 input:focus, select:focus, textarea:focus {
     box-shadow: inset 8px 8px 16px #4a5160, inset -8px -8px 16px #727b8e !important;

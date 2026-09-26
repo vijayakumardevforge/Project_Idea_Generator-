@@ -465,6 +465,104 @@ label, .label-text {
     margin-bottom: 6px !important;
 }
 
+/* Custom Select Dropdown UI */
+.custom-select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.custom-select-display {
+    min-height: 40px !important;
+    padding: 10px 15px !important;
+    background: #e8e8e8 !important;
+    box-shadow: 5px 5px 17px #c8c8c8, -5px -5px 17px #ffffff !important;
+    border-radius: 10px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 14px !important;
+    color: #2B303A !important;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all .5s !important;
+}
+
+.custom-select-display.open {
+    box-shadow: inset 5px 5px 17px #c8c8c8, inset -5px -5px 17px #ffffff !important;
+}
+
+.custom-select-display i {
+    transition: transform 0.3s ease;
+    color: #5A626A !important;
+}
+.custom-select-display.open i {
+    transform: rotate(180deg);
+}
+
+.custom-select-options {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    right: 0;
+    background: #e8e8e8 !important;
+    border-radius: 10px !important;
+    box-shadow: 5px 5px 17px #c8c8c8, -5px -5px 17px #ffffff !important;
+    z-index: 100;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.custom-select-options.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.custom-option {
+    padding: 12px 15px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 14px !important;
+    color: #2B303A !important;
+    cursor: pointer;
+    transition: background 0.2s ease !important;
+}
+
+.custom-option:hover {
+    background: #c8c8c8 !important;
+}
+
+.custom-option.selected {
+    background: #d1d5db !important;
+    font-weight: 600 !important;
+}
+
+.custom-option.disabled {
+    color: #A0AAB5 !important;
+    cursor: not-allowed;
+    background: transparent !important;
+}
+.custom-option.disabled:hover {
+    background: transparent !important;
+}
+
+/* Custom Scrollbar for dropdown */
+.custom-select-options::-webkit-scrollbar {
+    width: 8px;
+}
+.custom-select-options::-webkit-scrollbar-track {
+    background: #e8e8e8;
+    border-radius: 10px;
+}
+.custom-select-options::-webkit-scrollbar-thumb {
+    background: #bcbcbc;
+    border-radius: 10px;
+}
+
 `;
 
 fs.writeFileSync(cssPath, styleCss.trim() + '\n\n' + premiumNeumorphism);

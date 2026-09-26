@@ -51,21 +51,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const customProjectTitleInput = document.getElementById('customProjectTitle');
     const topicRadios = document.querySelectorAll('input[name="topicType"]');
     
+    function toggleProjectTopic() {
+        const selectedTopic = document.querySelector('input[name="topicType"]:checked').value;
+        const domainWrapper = projectDomainSelect.closest('.custom-select-wrapper') || projectDomainSelect;
+        if (selectedTopic === 'custom') {
+            domainWrapper.classList.add('hidden');
+            projectDomainSelect.disabled = true;
+            customProjectTitleInput.classList.remove('hidden');
+            customProjectTitleInput.disabled = false;
+        } else {
+            domainWrapper.classList.remove('hidden');
+            projectDomainSelect.disabled = false;
+            customProjectTitleInput.classList.add('hidden');
+            customProjectTitleInput.disabled = true;
+        }
+    }
+
     topicRadios.forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            if (e.target.value === 'custom') {
-                projectDomainSelect.classList.add('hidden');
-                projectDomainSelect.disabled = true;
-                customProjectTitleInput.classList.remove('hidden');
-                customProjectTitleInput.disabled = false;
-            } else {
-                projectDomainSelect.classList.remove('hidden');
-                projectDomainSelect.disabled = false;
-                customProjectTitleInput.classList.add('hidden');
-                customProjectTitleInput.disabled = true;
-            }
-        });
+        radio.addEventListener('change', toggleProjectTopic);
     });
+    
+    // Initialize state on load in case of browser refresh
+    toggleProjectTopic();
 
     function updateDomains() {
         const lang = programmingLanguageSelect.value;
@@ -1127,31 +1134,31 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentTourStep = 0;
     const tourStepsData = [
         {
-            title: "Welcome to IdeaGen AI 💡",
+            title: "Welcome to IdeaGen AI",
             description: "Your personal AI system architect! Whether you are building a portfolio app or enterprise software, our AI designs full project architectures, database schemas, and step-by-step implementation roadmaps tailored precisely to you.",
             visual: '<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Synthesizing custom software architectures in seconds</span>',
             spotlight: null
         },
         {
-            title: "Step 1: Choose Your Tech Stack 🛠️",
+            title: "Step 1: Choose Your Tech Stack",
             description: "Start by picking your desired **Skill Level** (Beginner to Advanced), your preferred **Programming Language** (Java, Python, C#, TS, etc.), and the exact **Framework** you want to use (like Spring Boot or Next.js).",
             visual: '<i class="fa-solid fa-code"></i> <span>Over 50+ language & framework configurations supported</span>',
             spotlight: '.form-grid'
         },
         {
-            title: "Step 2: Select Your Domain & Spark 🎯",
+            title: "Step 2: Select Your Domain & Spark",
             description: "Choose a **Project Domain** like Healthcare, E-Commerce, AI & Machine Learning, or Spring Boot RAG. Then click **Generate Project Idea** to let the AI architect your roadmap!",
             visual: '<i class="fa-solid fa-bullseye"></i> <span>Tailored domain architectures with custom database schemas</span>',
             spotlight: '.generate-btn'
         },
         {
-            title: "Step 3: Explore Deep Roadmaps & Schemas 📋",
+            title: "Step 3: Explore Deep Roadmaps & Schemas",
             description: "Once generated, you get a full architectural blueprint: **Key Features**, **Suggested SQL/NoSQL Tables**, **REST Endpoints**, and a **Dynamic Implementation Roadmap** button that writes a comprehensive step-by-step tutorial!",
             visual: '<i class="fa-solid fa-list-check"></i> <span>Complete step-by-step markdown plan to build your app</span>',
             spotlight: '#result-container'
         },
         {
-            title: "Step 4: Save, Share & Download PDF 🚀",
+            title: "Step 4: Save, Share & Download PDF",
             description: "**Login/Register** to bookmark ideas to your **Profile**. You can also **Download as a clean PDF**, **Copy** to clipboard, or **Share** with teammates. You are all set to start innovating!",
             visual: '<i class="fa-solid fa-file-pdf"></i> <span>Export your architectural plan instantly and start coding!</span>',
             spotlight: null
