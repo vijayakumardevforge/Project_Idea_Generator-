@@ -139,11 +139,15 @@
                         <div class="input-group">
                             <label>Project Topic</label>
                             <div class="toggle-group" style="display: flex; gap: 1rem; margin-bottom: 0.75rem;">
-                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer; color: var(--text-light);">
-                                    <input type="radio" name="topicType" value="domain" checked style="width: auto;"> Choose Domain
+                                <label class="checkbox">
+                                    <span class="label">Choose Domain</span>
+                                    <input type="radio" name="topicType" value="domain" checked>
+                                    <div class="checkmark"></div>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer; color: var(--text-light);">
-                                    <input type="radio" name="topicType" value="custom" style="width: auto;"> Custom Title
+                                <label class="checkbox">
+                                    <span class="label">Custom Title</span>
+                                    <input type="radio" name="topicType" value="custom">
+                                    <div class="checkmark"></div>
                                 </label>
                             </div>
                             
@@ -188,40 +192,42 @@
                 <p>Login to save your generated ideas and access your profile.</p>
             </header>
             
-            <div class="glass form-container fade-in-up" style="max-width: 450px;">
+            <div class="content fade-in-up" style="margin: 0 auto;">
                 <div id="auth-error" class="hidden" style="color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid rgba(239, 68, 68, 0.2); text-align: center;"></div>
                 
                 <form id="login-form">
-                    <div class="input-group" style="margin-bottom: 1.5rem;">
-                        <label for="login-email">Email</label>
-                        <input type="email" id="login-email" required placeholder="Enter your email">
+                    <div class="text">Login</div>
+                    <div class="field">
+                        <span class="span"><i class="fa-solid fa-envelope"></i></span>
+                        <input type="email" id="login-email" class="input" required>
+                        <label for="login-email" class="label">Enter your email</label>
                     </div>
-                    <div class="input-group" style="margin-bottom: 2rem;">
-                        <label for="login-password">Password</label>
-                        <input type="password" id="login-password" required placeholder="Enter your password">
+                    <div class="field">
+                        <span class="span"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="login-password" class="input" required>
+                        <label for="login-password" class="label">Enter your password</label>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1.5rem;">
-                        <i class="fa-solid fa-right-to-bracket"></i> Login
-                    </button>
-                    <div style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">
-                        Don't have an account? <a href="#" id="show-register" style="color: var(--primary); text-decoration: none;">Register here</a>
+                    <button type="submit" class="button">Login</button>
+                    <div class="sign-up" style="text-align: center;">
+                        Don't have an account? <a href="#" id="show-register">Register here</a>
                     </div>
                 </form>
 
                 <form id="register-form" class="hidden">
-                    <div class="input-group" style="margin-bottom: 1.5rem;">
-                        <label for="register-email">Email</label>
-                        <input type="email" id="register-email" required placeholder="Enter your email">
+                    <div class="text">Register</div>
+                    <div class="field">
+                        <span class="span"><i class="fa-solid fa-envelope"></i></span>
+                        <input type="email" id="register-email" class="input" required>
+                        <label for="register-email" class="label">Enter your email</label>
                     </div>
-                    <div class="input-group" style="margin-bottom: 2rem;">
-                        <label for="register-password">Password</label>
-                        <input type="password" id="register-password" required placeholder="Create a password">
+                    <div class="field">
+                        <span class="span"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="register-password" class="input" required>
+                        <label for="register-password" class="label">Create a password</label>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1.5rem;">
-                        <i class="fa-solid fa-user-plus"></i> Register
-                    </button>
-                    <div style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">
-                        Already have an account? <a href="#" id="show-login" style="color: var(--primary); text-decoration: none;">Login here</a>
+                    <button type="submit" class="button">Register</button>
+                    <div class="sign-up" style="text-align: center;">
+                        Already have an account? <a href="#" id="show-login">Login here</a>
                     </div>
                 </form>
             </div>
