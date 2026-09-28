@@ -103,6 +103,16 @@ document.addEventListener('DOMContentLoaded', () => {
             buildOptions();
         });
         observer.observe(originalSelect, { childList: true, subtree: true });
+        
+        // Listen for form reset
+        const form = originalSelect.closest('form');
+        if (form) {
+            form.addEventListener('reset', () => {
+                setTimeout(() => {
+                    buildOptions();
+                }, 10);
+            });
+        }
     });
     
     // Close dropdowns when clicking outside

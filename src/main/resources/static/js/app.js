@@ -500,9 +500,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 container.classList.add('hidden');
                 generateForm.parentElement.classList.remove('hidden');
                 generateForm.reset();
-                lastLanguage = '';
-                frameworkSelect.innerHTML = '<option value="" disabled selected>Select Language First</option>';
-                updateDomains();
+                
+                setTimeout(() => {
+                    lastLanguage = '';
+                    frameworkSelect.innerHTML = '<option value="" disabled selected>Select Language First</option>';
+                    updateDomains();
+                    toggleProjectTopic();
+                }, 10);
             };
 
             const regenerateBtn = document.createElement('button');

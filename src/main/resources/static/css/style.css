@@ -445,27 +445,27 @@ select option {
 .admin-table {
   width: 100%;
   border-collapse: collapse;
-  color: #9ca3af;
+  color: #595959;
 }
 
 .admin-table th,
 .admin-table td {
   padding: 1.5rem 1rem;
   text-align: left;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   vertical-align: top;
 }
 
 .admin-table th {
   font-weight: 700;
-  color: white;
+  color: #2B303A;
   font-size: 1.05rem;
   padding-top: 1rem;
   padding-bottom: 1.5rem;
 }
 
 .admin-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(0, 0, 0, 0.02);
 }
 
 .stars-display {
@@ -706,8 +706,8 @@ select option {
   }
   .admin-table tr {
     margin-bottom: 1.5rem;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.05);
     border-radius: 0.5rem;
     padding: 0.5rem;
   }
@@ -717,7 +717,7 @@ select option {
     align-items: flex-start;
     text-align: right;
     padding: 0.75rem 0.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     gap: 1rem;
   }
   .admin-table td:last-child {
@@ -726,7 +726,7 @@ select option {
   .admin-table td::before {
     content: attr(data-label);
     font-weight: 600;
-    color: #f8fafc;
+    color: #2B303A;
     text-align: left;
     flex-shrink: 0;
   }
@@ -1175,10 +1175,10 @@ select option {
 
 .sidebar-link {
   padding: 1rem 1.5rem;
-  color: var(--text-muted);
+  color: #595959;
   background: transparent;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 15px;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
@@ -1187,19 +1187,17 @@ select option {
   font-weight: 500;
 }
 
-.sidebar-link:hover {
-  background: transparent;
-  color: white;
+.sidebar-link:hover:not(.active) {
+  background: #e8e8e8;
+  color: #2B303A;
+  box-shadow: 3px 3px 10px #c8c8c8, -3px -3px 10px #ffffff;
 }
 
 .sidebar-link.active {
-  background: linear-gradient(
-    to right,
-    rgba(139, 92, 246, 0.2),
-    rgba(236, 72, 153, 0.2)
-  );
-  border-left: 4px solid #ec4899;
-  color: white;
+  background: #dde1e7;
+  box-shadow: inset 2px 2px 5px #BABECC, inset -5px -5px 10px #ffffff73;
+  border-left: none;
+  color: #2B303A;
   font-weight: 600;
 }
 
@@ -2617,14 +2615,15 @@ div[style*="border: 1px solid rgba(239, 68, 68, 0.2)"] {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  left: 45px;
+  left: 50px;
   pointer-events: none;
   color: #666666;
   transition: opacity 0.3s ease;
 }
 
 .field .input:valid ~ .label,
-.field .input:focus ~ .label {
+.field .input:focus ~ .label,
+.field .input:-webkit-autofill ~ .label {
   opacity: 0;
 }
 
@@ -2848,8 +2847,22 @@ label, .label-text {
 
 /* Fix login icon overlap */
 #login-form .field input, 
-#register-form .field input {
+#register-form .field input,
+#admin-login-form .field input,
+#login-form .field input:-webkit-autofill, 
+#register-form .field input:-webkit-autofill,
+#admin-login-form .field input:-webkit-autofill {
     padding-left: 50px !important;
+}
+
+/* WebKit autofill background override */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #dde1e7 inset !important;
+    -webkit-text-fill-color: #595959 !important;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
 /* Animated Sparkle Button */
