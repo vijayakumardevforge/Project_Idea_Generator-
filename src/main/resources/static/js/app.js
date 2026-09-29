@@ -1284,5 +1284,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Scroll Navbar Hide/Show Logic
+    let lastScrollY = window.scrollY;
+    const navbar = document.querySelector('.navbar');
+    
+    window.addEventListener('scroll', () => {
+        if (!navbar) return;
+        const currentScrollY = window.scrollY;
+        
+        // Don't hide if at the top
+        if (currentScrollY <= 50) {
+            navbar.classList.remove('nav-hidden');
+        } else if (currentScrollY > lastScrollY) {
+            // Scrolling down
+            navbar.classList.add('nav-hidden');
+        } else {
+            // Scrolling up
+            navbar.classList.remove('nav-hidden');
+        }
+        
+        lastScrollY = currentScrollY;
+    }, { passive: true });
+
 });
 
