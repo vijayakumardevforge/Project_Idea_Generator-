@@ -145,6 +145,32 @@ public class ProjectIdeaController {
         return ResponseEntity.ok(savedIdeas);
     }
 
+    @DeleteMapping("/saved/{id}")
+    public ResponseEntity<?> deleteSavedIdea(@PathVariable Long id, org.springframework.security.core.Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(401).body(java.util.Map.of("message", "Unauthorized"));
+        }
+
+        java.util.Optional<com.aigenerator.project_idea_generator.model.User> userOpt = userRepository
+                .findByEmail(authentication.getName());
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(401).body(java.util.Map.of("message", "User not found"));
+        }
+
+        ProjectIdea idea = service.getProjectById(id);
+        if (idea == null) {
+            return ResponseEntity.status(404).body(java.util.Map.of("message", "Idea not found"));
+        }
+
+        if (idea.getUser() == null || !idea.getUser().getId().equals(userOpt.get().getId())) {
+             return ResponseEntity.status(403).body(java.util.Map.of("message", "Forbidden: You don't own this idea"));
+        }
+
+        ideaRepository.delete(idea);
+        return ResponseEntity.ok(java.util.Map.of("message", "Idea deleted successfully"));
+    }
+
     private String extractIp(HttpServletRequest httpRequest) {
         String ipAddress = httpRequest.getHeader("X-Forwarded-For");
         if (ipAddress == null || ipAddress.isEmpty()) {

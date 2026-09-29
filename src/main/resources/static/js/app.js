@@ -429,7 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const projects = Array.isArray(data) ? data : (data.data || []);
             
             projects.forEach(project => {
-                const card = createHistoryCard(project);
+                const card = createHistoryCard(project, true);
                 profileGrid.appendChild(card);
             });
             
@@ -847,25 +847,40 @@ document.addEventListener('DOMContentLoaded', () => {
         ulElement.innerHTML = items.map(item => `<li>${item}</li>`).join('');
     }
 
-    function createHistoryCard(project) {
+    function createHistoryCard(project, isSavedView = false) {
         const div = document.createElement('div');
         div.className = 'glass-inner history-card fade-in-up';
+        div.style.position = 'relative'; // For absolute positioning of delete button
         
         const date = new Date(project.createdAt).toLocaleDateString(undefined, { 
             year: 'numeric', month: 'short', day: 'numeric' 
         });
 
+        let deleteBtnHtml = '';
+        if (isSavedView) {
+            deleteBtnHtml = `<button class="btn btn-secondary delete-idea-btn" style="position: absolute; top: 1rem; right: 1rem; padding: 0.5rem 0.75rem; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: #ef4444; z-index: 10;" title="Delete Idea" data-id="${project.id}"><i class="fa-solid fa-trash"></i></button>`;
+        }
+
         div.innerHTML = `
+            ${deleteBtnHtml}
             <div class="tags">
                 <span class="tag lang-tag">${project.programmingLanguage}</span>
                 <span class="tag domain-tag">${project.projectDomain}</span>
             </div>
-            <h3>${project.projectName}</h3>
+            <h3 style="${isSavedView ? 'padding-right: 2.5rem;' : ''}">${project.projectName}</h3>
             <p>${project.projectDescription}</p>
             <span class="date">${date}</span>
         `;
 
-        div.addEventListener('click', () => {
+        div.addEventListener('click', (e) => {
+            // Check if click was on delete button
+            if (e.target.closest('.delete-idea-btn')) {
+                if(confirm('Are you sure you want to delete this saved idea?')) {
+                    deleteSavedIdea(project.id);
+                }
+                return; // Stop further execution so we don't open the idea view
+            }
+
             // Re-use result container to show full details
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             const generateView = document.getElementById('generate-view');
@@ -882,6 +897,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         return div;
+    }
+
+    async function deleteSavedIdea(projectId) {
+        try {
+            const res = await fetch(`${API_BASE_URL}/saved/${projectId}`, { method: 'DELETE' });
+            if (res.ok) {
+                // Remove from UI immediately or just reload profile
+                loadProfile();
+            } else {
+                alert('Failed to delete idea.');
+            }
+        } catch (error) {
+            console.error('Error deleting idea:', error);
+            alert('An error occurred while deleting the idea.');
+        }
     }
 
     // Feedback Logic
