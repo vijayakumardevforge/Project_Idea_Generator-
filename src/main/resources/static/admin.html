@@ -69,7 +69,7 @@
                     <label for="password" class="label">Password</label>
                 </div>
                 <button type="submit" class="button">Login</button>
-                <div id="login-error" class="hidden" style="color: #ef4444; margin-top: 1rem; text-align: center;">
+                <div id="login-error" class="hidden" style="color: #e53935; background: #e8e8e8; box-shadow: inset 5px 5px 17px #c8c8c8, inset -5px -5px 17px #ffffff; padding: 12px; border-radius: 10px; margin-top: 1rem; text-align: center; font-weight: 600; font-size: 14px; letter-spacing: 0.5px;">
                     Invalid credentials
                 </div>
             </form>
@@ -300,6 +300,37 @@
             </div>
         </section>
     </main>
+
+    <!-- Custom Confirm Modal -->
+    <div id="admin-confirm-modal" class="modal hidden" style="position: fixed; inset: 0; background: rgba(224, 224, 224, 0.8); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+        <div class="modal-content neon-card fade-in-up" style="background: #e0e0e0; box-shadow: var(--neumorph-convex); padding: 2rem; border-radius: var(--neumorph-radius-lg); max-width: 400px; text-align: center;">
+            <h2 class="neon-title" style="margin-bottom: 1rem; font-size: 1.5rem; color: var(--text-main);">Confirm Action</h2>
+            <p id="admin-confirm-message" style="margin-bottom: 2rem; color: var(--text-muted);"></p>
+            <div style="display: flex; justify-content: center; gap: 1rem;">
+                <button id="admin-confirm-cancel" class="btn" style="min-width: 100px;">Cancel</button>
+                <button id="admin-confirm-ok" class="sparkle-button" style="min-width: 100px; justify-content: center; --black-700: #000000; padding: 0.5rem 1.5rem;">
+                    <div class="dots_border"></div>
+                    <span class="text_button">Confirm</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Prompt Modal -->
+    <div id="admin-prompt-modal" class="modal hidden" style="position: fixed; inset: 0; background: rgba(224, 224, 224, 0.8); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+        <div class="modal-content neon-card fade-in-up" style="background: #e0e0e0; box-shadow: var(--neumorph-convex); padding: 2rem; border-radius: var(--neumorph-radius-lg); max-width: 400px; text-align: center;">
+            <h2 class="neon-title" style="margin-bottom: 1rem; font-size: 1.5rem; color: var(--text-main);">Input Required</h2>
+            <p id="admin-prompt-message" style="margin-bottom: 1rem; color: var(--text-muted);"></p>
+            <input type="text" id="admin-prompt-input" class="neon-input" style="width: 100%; margin-bottom: 2rem;" />
+            <div style="display: flex; justify-content: center; gap: 1rem;">
+                <button id="admin-prompt-cancel" class="btn" style="min-width: 100px;">Cancel</button>
+                <button id="admin-prompt-ok" class="sparkle-button" style="min-width: 100px; justify-content: center; --black-700: #000000; padding: 0.5rem 1.5rem;">
+                    <div class="dots_border"></div>
+                    <span class="text_button">Submit</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script src="js/admin.js"></script>
 </body>

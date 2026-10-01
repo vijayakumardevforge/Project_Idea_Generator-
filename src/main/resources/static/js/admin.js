@@ -391,8 +391,77 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error('Error loading blocked IPs:', error); }
     }
 
+    function showAdminConfirm(message) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('admin-confirm-modal');
+            const messageEl = document.getElementById('admin-confirm-message');
+            const okBtn = document.getElementById('admin-confirm-ok');
+            const cancelBtn = document.getElementById('admin-confirm-cancel');
+
+            messageEl.textContent = message;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+
+            const handleOk = () => {
+                cleanup();
+                resolve(true);
+            };
+
+            const handleCancel = () => {
+                cleanup();
+                resolve(false);
+            };
+
+            const cleanup = () => {
+                modal.classList.add('hidden');
+                document.body.style.overflow = ''; // Restore background scrolling
+                okBtn.removeEventListener('click', handleOk);
+                cancelBtn.removeEventListener('click', handleCancel);
+            };
+
+            okBtn.addEventListener('click', handleOk);
+            cancelBtn.addEventListener('click', handleCancel);
+        });
+    }
+
+    function showAdminPrompt(message, defaultValue) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('admin-prompt-modal');
+            const messageEl = document.getElementById('admin-prompt-message');
+            const inputEl = document.getElementById('admin-prompt-input');
+            const okBtn = document.getElementById('admin-prompt-ok');
+            const cancelBtn = document.getElementById('admin-prompt-cancel');
+
+            messageEl.textContent = message;
+            inputEl.value = defaultValue || '';
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            inputEl.focus();
+
+            const handleOk = () => {
+                cleanup();
+                resolve(inputEl.value);
+            };
+
+            const handleCancel = () => {
+                cleanup();
+                resolve(null);
+            };
+
+            const cleanup = () => {
+                modal.classList.add('hidden');
+                document.body.style.overflow = ''; // Restore background scrolling
+                okBtn.removeEventListener('click', handleOk);
+                cancelBtn.removeEventListener('click', handleCancel);
+            };
+
+            okBtn.addEventListener('click', handleOk);
+            cancelBtn.addEventListener('click', handleCancel);
+        });
+    }
+
     window.blockUser = async function(ipAddress) {
-        const reason = prompt(`Enter reason for blocking ${ipAddress} (or leave blank):`, 'Suspicious activity');
+        const reason = await showAdminPrompt(`Enter reason for blocking ${ipAddress} (or leave blank):`, 'Suspicious activity');
         if (reason === null) return; // User cancelled
 
         const authString = sessionStorage.getItem('adminAuth');
@@ -412,7 +481,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.unblockUser = async function(ipAddress) {
-        if (!confirm(`Are you sure you want to unblock ${ipAddress}?`)) return;
+        const confirmed = await showAdminConfirm(`Are you sure you want to unblock ${ipAddress}?`);
+        if (!confirmed) return;
+        
         const authString = sessionStorage.getItem('adminAuth');
         try {
             const res = await fetch(`${API_BASE_URL}/unblock-ip`, {

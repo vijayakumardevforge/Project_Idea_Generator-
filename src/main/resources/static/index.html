@@ -204,7 +204,7 @@
             </header>
             
             <div class="content fade-in-up" style="margin: 0 auto;">
-                <div id="auth-error" class="hidden" style="color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid rgba(239, 68, 68, 0.2); text-align: center;"></div>
+                <div id="auth-error" class="hidden" style="color: #e53935; background: #e8e8e8; box-shadow: inset 5px 5px 17px #c8c8c8, inset -5px -5px 17px #ffffff; padding: 12px; border-radius: 10px; margin-bottom: 1.5rem; text-align: center; font-weight: 600; font-size: 14px; letter-spacing: 0.5px;"></div>
                 
                 <form id="login-form">
                     <div class="text">Login</div>
@@ -359,6 +359,32 @@
         </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-confirm-modal" class="modal hidden">
+        <div class="modal-content neon-card fade-in-up" style="max-width: 400px; text-align: center;">
+            <h2 class="neon-title" style="margin-bottom: 1rem; font-size: 1.5rem;"><i class="fa-solid fa-trash" style="color: #ef4444;"></i> Delete Idea</h2>
+            <p style="margin-bottom: 2rem; color: var(--text-muted);">Are you sure you want to delete this saved idea? This action cannot be undone.</p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button id="cancel-delete-btn" class="btn btn-secondary action-btn" style="flex: 1;">Cancel</button>
+                <button id="confirm-delete-btn" class="btn btn-primary action-btn" style="flex: 1; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border: none;">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic Alert Modal -->
+    <div id="custom-alert-modal" class="modal hidden">
+        <div class="modal-content neon-card fade-in-up" style="max-width: 400px; text-align: center;">
+            <h2 id="custom-alert-title" class="neon-title" style="margin-bottom: 1rem; font-size: 1.5rem;">Alert</h2>
+            <p id="custom-alert-message" style="margin-bottom: 2rem; color: var(--text-muted);"></p>
+            <div style="display: flex; justify-content: center;">
+                <button id="custom-alert-ok-btn" class="sparkle-button" style="min-width: 120px; justify-content: center; --black-700: #000000; padding: 0.5rem 2rem;">
+                    <div class="dots_border"></div>
+                    <span class="text_button">OK</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Interactive Step-by-Step Onboarding Walkthrough Tour -->
     <div id="onboarding-tour-overlay" class="tour-overlay hidden">
         <div class="tour-card neon-card fade-in-up">
@@ -398,6 +424,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="js/custom-select.js"></script>
-    <script src="js/app.js?v=4"></script>
+    <script src="js/app.js?v=5"></script>
 </body>
 </html>

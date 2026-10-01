@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Show login form after registration
                 registerForm.classList.add('hidden');
                 loginForm.classList.remove('hidden');
-                alert('Registration successful! Please login.');
+                showCustomAlert('Registration successful! Please login.', 'Success', 'success');
             } else {
                 authError.textContent = data.message || 'Registration failed';
                 authError.classList.remove('hidden');
@@ -328,6 +328,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
+                if (response.status === 403) {
+                    throw new Error("USER_BLOCKED");
+                }
                 const errorData = await response.json().catch(() => ({}));
                 if (errorData.message === "Reenter the title") {
                     throw new Error("REENTER_TITLE");
@@ -358,12 +361,14 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error(error);
             if (error.message === "REENTER_TITLE") {
-                alert("Unwanted content detected. Please re-enter a valid project title.");
+                showCustomAlert("Unwanted content detected. Please re-enter a valid project title.", 'Warning', 'error');
                 const customTitleInput = document.getElementById('customProjectTitle');
                 customTitleInput.value = '';
                 customTitleInput.focus();
+            } else if (error.message === "USER_BLOCKED") {
+                showCustomAlert("Your access has been restricted. If you believe this is an error, please contact us at ideagen.ai42", 'Access Denied', 'error');
             } else {
-                alert('An error occurred while generating the idea. Please check the backend connection and API keys.');
+                showCustomAlert('An error occurred while generating the idea. Please check the backend connection and API keys.', 'Error', 'error');
             }
             
             // Reset UI State
@@ -444,14 +449,14 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`${API_BASE_URL}/${projectId}/save`, { method: 'POST' });
             if (res.ok) {
-                alert('Idea saved successfully!');
+                showCustomAlert('Idea saved successfully!', 'Success', 'success');
                 navigateToPage('profile');
             } else {
-                alert('Failed to save idea. Please try again.');
+                showCustomAlert('Failed to save idea. Please try again.', 'Error', 'error');
             }
         } catch (error) {
             console.error(error);
-            alert('Error saving idea.');
+            showCustomAlert('Error saving idea.', 'Error', 'error');
         }
     }
 
@@ -716,7 +721,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
                     
-                    if (!response.ok) throw new Error('Failed to generate roadmap');
+                    if (!response.ok) {
+                        if (response.status === 403) {
+                            throw new Error("USER_BLOCKED");
+                        }
+                        throw new Error('Failed to generate roadmap');
+                    }
                     
                     const updatedProject = await response.json();
                     project.detailedRoadmap = updatedProject.detailedRoadmap;
@@ -735,7 +745,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     activeRoadmapContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 } catch (error) {
                     console.error(error);
-                    alert('Error generating roadmap. Please try again later.');
+                    if (error.message === "USER_BLOCKED") {
+                        showCustomAlert("Your access has been restricted. If you believe this is an error, please contact us at ideagen.ai42", 'Access Denied', 'error');
+                    } else {
+                        showCustomAlert('Error generating roadmap. Please try again later.', 'Error', 'error');
+                    }
                     generateRoadmapBtn.innerHTML = originalText;
                     generateRoadmapBtn.disabled = false;
                 }
@@ -781,7 +795,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => copyIdeaBtn.innerHTML = originalHtml, 2000);
                 }).catch(err => {
                     console.error('Could not copy text: ', err);
-                    alert('Failed to copy to clipboard.');
+                    showCustomAlert('Failed to copy to clipboard.', 'Error', 'error');
                 });
             };
 
@@ -875,9 +889,27 @@ document.addEventListener('DOMContentLoaded', () => {
         div.addEventListener('click', (e) => {
             // Check if click was on delete button
             if (e.target.closest('.delete-idea-btn')) {
-                if(confirm('Are you sure you want to delete this saved idea?')) {
+                const deleteModal = document.getElementById('delete-confirm-modal');
+                const cancelBtn = document.getElementById('cancel-delete-btn');
+                const confirmBtn = document.getElementById('confirm-delete-btn');
+                
+                // Clean up previous event listeners by replacing the buttons
+                const newCancelBtn = cancelBtn.cloneNode(true);
+                const newConfirmBtn = confirmBtn.cloneNode(true);
+                cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+                confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+                
+                deleteModal.classList.remove('hidden');
+                
+                newCancelBtn.addEventListener('click', () => {
+                    deleteModal.classList.add('hidden');
+                });
+                
+                newConfirmBtn.addEventListener('click', () => {
+                    deleteModal.classList.add('hidden');
                     deleteSavedIdea(project.id);
-                }
+                });
+
                 return; // Stop further execution so we don't open the idea view
             }
 
@@ -906,11 +938,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Remove from UI immediately or just reload profile
                 loadProfile();
             } else {
-                alert('Failed to delete idea.');
+                showCustomAlert('Failed to delete idea.', 'Error', 'error');
             }
         } catch (error) {
             console.error('Error deleting idea:', error);
-            alert('An error occurred while deleting the idea.');
+            showCustomAlert('An error occurred while deleting the idea.', 'Error', 'error');
         }
     }
 
@@ -989,7 +1021,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         if (feedbackData.stars === 0) {
-            alert('Please select a star rating');
+            showCustomAlert('Please select a star rating', 'Warning', 'error');
             return;
         }
 
@@ -1009,11 +1041,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     feedbackModal.classList.add('hidden');
                 }, 2000);
             } else {
-                alert('Failed to submit feedback');
+                showCustomAlert('Failed to submit feedback', 'Error', 'error');
             }
         } catch (e) {
             console.error(e);
-            alert('Error submitting feedback');
+            showCustomAlert('Error submitting feedback', 'Error', 'error');
         }
     });
 
@@ -1208,6 +1240,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentTourStep = stepIndex;
         renderTourStep();
         tourOverlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
     };
 
     const tourBody = document.querySelector('.tour-body');
@@ -1271,7 +1304,10 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 tourOverlay.classList.add('hidden');
                 tourOverlay.classList.remove('closing');
+                document.body.style.overflow = ''; // Restore background scrolling
             }, 500);
+        } else {
+            document.body.style.overflow = ''; // Restore background scrolling fallback
         }
         localStorage.setItem('hasSeenTour_v1', 'true');
     }
@@ -1338,3 +1374,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
+
+
+// Generic Custom Alert Function
+window.showCustomAlert = function(message, title = 'Notification', type = 'info') {
+    const alertModal = document.getElementById('custom-alert-modal');
+    if (!alertModal) {
+        alert(message); // Fallback
+        return;
+    }
+    
+    const titleEl = document.getElementById('custom-alert-title');
+    const msgEl = document.getElementById('custom-alert-message');
+    const okBtn = document.getElementById('custom-alert-ok-btn');
+    
+    let iconHtml = '';
+    if (type === 'error') {
+        iconHtml = '<i class="fa-solid fa-circle-exclamation" style="color: #ef4444; margin-right: 8px;"></i>';
+    } else if (type === 'success') {
+        iconHtml = '<i class="fa-solid fa-circle-check" style="color: #10b981; margin-right: 8px;"></i>';
+    } else {
+        iconHtml = '<i class="fa-solid fa-circle-info" style="color: #3b82f6; margin-right: 8px;"></i>';
+    }
+    
+    titleEl.innerHTML = iconHtml + title;
+    msgEl.textContent = message;
+    
+    const newOkBtn = okBtn.cloneNode(true);
+    okBtn.parentNode.replaceChild(newOkBtn, okBtn);
+    
+    alertModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    
+    newOkBtn.addEventListener('click', () => {
+        alertModal.classList.add('hidden');
+        document.body.style.overflow = ''; // Restore background scrolling
+    });
+};
