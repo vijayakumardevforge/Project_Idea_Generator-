@@ -137,12 +137,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const loginNav = document.getElementById('nav-login');
         const profileNav = document.getElementById('nav-profile');
         const adminNav = document.getElementById('nav-admin');
-        const logoutNav = document.getElementById('nav-logout');
 
         if (currentUser) {
             loginNav.classList.add('hidden');
             profileNav.classList.remove('hidden');
-            logoutNav.classList.remove('hidden');
             if (currentUser.role === 'ROLE_ADMIN') {
                 adminNav.classList.remove('hidden');
             } else {
@@ -151,7 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             loginNav.classList.remove('hidden');
             profileNav.classList.add('hidden');
-            logoutNav.classList.add('hidden');
             adminNav.classList.add('hidden');
         }
     }

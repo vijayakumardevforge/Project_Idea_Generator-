@@ -95,7 +95,6 @@
                 <li id="nav-login"><a href="#" data-page="login"><i class="fa-solid fa-user"></i> Login</a></li>
                 <li id="nav-profile" class="hidden"><a href="#" data-page="profile"><i class="fa-solid fa-address-card"></i> Profile</a></li>
                 <li id="nav-admin" class="hidden"><a href="admin.html" class="admin-link"><i class="fa-solid fa-lock"></i> Admin</a></li>
-                <li id="nav-logout" class="hidden"><a href="#" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
                 <li id="nav-tour"><a href="#" id="start-tour-link" title="Interactive Step-by-Step Guide"><i class="fa-solid fa-compass"></i> Guide</a></li>
             </ul>
         </div>
@@ -246,9 +245,15 @@
 
         <!-- Profile View -->
         <section id="profile-view" class="view">
-            <header class="view-header">
-                <h1 class="gradient-text">Your Profile</h1>
-                <p>Welcome back! Here are the ideas you've saved.</p>
+            <header class="view-header" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; text-align: left; margin-bottom: 2rem;">
+                <div>
+                    <h1 class="gradient-text" style="margin-bottom: 0.5rem;">Your Profile</h1>
+                    <p style="margin: 0;">Welcome back! Here are the ideas you've saved.</p>
+                </div>
+                <button id="logout-btn" class="neumorphic-logout-btn" style="display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1.5rem; background: #e0e5ec; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; font-weight: 700; font-family: inherit; cursor: pointer; box-shadow: 6px 6px 12px #a3b1c6, -6px -6px 12px #ffffff; transition: all 0.3s ease;">
+                    <i class="fa-solid fa-right-from-bracket" style="color: #334155; font-size: 1.1rem;"></i> 
+                    <span style="color: #ef4444; font-size: 1rem; letter-spacing: 0.5px;">Logout</span>
+                </button>
             </header>
 
             <div id="profile-loading" class="loading-container">

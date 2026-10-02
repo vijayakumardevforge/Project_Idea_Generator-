@@ -863,7 +863,7 @@ select option {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
   z-index: 1000;
   display: flex;
@@ -1833,7 +1833,7 @@ select option {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(2, 6, 23, 0.82);
+  background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   z-index: 5000;
@@ -3013,3 +3013,9 @@ input:-webkit-autofill:active {
     color: #6366f1 !important;
     filter: none !important;
 }
+
+.logout-action-btn:hover { background: rgba(239, 68, 68, 0.2) !important; color: #f87171 !important; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15); }
+
+
+.neumorphic-logout-btn:hover { box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #ffffff !important; transform: scale(0.98); }
+
