@@ -37,3 +37,7 @@ application-secrets.properties
 
 ### Custom Designs ###
 designs/
+
+### Private Project Details (DO NOT COMMIT OR PUSH) ###
+# Contains API keys, credentials, and sensitive local configuration
+PROJECT_DETAILS.md

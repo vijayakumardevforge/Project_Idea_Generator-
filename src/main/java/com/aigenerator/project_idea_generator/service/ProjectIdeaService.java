@@ -51,9 +51,15 @@ public class ProjectIdeaService {
     public ProjectIdea generateAndSaveRoadmap(Long id) {
         ProjectIdea idea = getProjectById(id);
         
-        // Don't regenerate if we already have it
-        if (idea.getDetailedRoadmap() != null && !idea.getDetailedRoadmap().isEmpty()) {
-            return idea;
+        // Don't regenerate if we already have a complete, healthy roadmap
+        if (idea.getDetailedRoadmap() != null && !idea.getDetailedRoadmap().trim().isEmpty()) {
+            String existing = idea.getDetailedRoadmap().trim();
+            boolean isMock = existing.contains("*(Mock Roadmap generated due to API error)*");
+            boolean isTruncated = existing.endsWith("[") || existing.endsWith("(") || existing.endsWith("=")
+                    || existing.endsWith("websocket_urlpatterns = [");
+            if (!isMock && !isTruncated) {
+                return idea;
+            }
         }
 
         String roadmap = huggingFaceService.generateDetailedRoadmap(idea);

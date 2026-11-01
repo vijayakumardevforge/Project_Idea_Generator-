@@ -18,11 +18,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class HuggingFaceService {
 
     private static final Logger log = LoggerFactory.getLogger(HuggingFaceService.class);
+    private static final List<String> MODELS = List.of(
+            "openai/gpt-oss-120b",
+            "openai/gpt-oss-20b"
+    );
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
     private final AdminFeatureService adminFeatureService;
@@ -59,16 +65,16 @@ public class HuggingFaceService {
         }
         
         String prompt = buildPrompt(request);
-        
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", "Qwen/Qwen2.5-Coder-32B-Instruct");
-        requestBody.put("temperature", 0.9);
-        requestBody.put("messages", List.of(Map.of("role", "user", "content", prompt)));
 
-        int maxRetries = 3;
-        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+        for (String model : MODELS) {
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("model", model);
+            requestBody.put("temperature", 0.7);
+            requestBody.put("max_tokens", 1800);
+            requestBody.put("messages", List.of(Map.of("role", "user", "content", prompt)));
+
             try {
-                log.info("Sending request to Hugging Face API (Attempt {}/{})", attempt, maxRetries);
+                log.info("Sending idea request to AI Router using model '{}'", model);
                 adminFeatureService.recordApiCall("IDEA");
                 byte[] responseBytes = restClient.post()
                         .uri(apiUrl)
@@ -79,40 +85,41 @@ public class HuggingFaceService {
                         .retrieve()
                         .body(byte[].class);
 
+                String rawResponse = new String(responseBytes, java.nio.charset.StandardCharsets.UTF_8);
+                log.info("Raw API response (idea, model {}): {}", model, rawResponse.length() > 500 ? rawResponse.substring(0, 500) : rawResponse);
                 JsonNode rootNode = objectMapper.readTree(responseBytes);
 
                 if (rootNode != null && rootNode.has("choices") && rootNode.get("choices").isArray() && !rootNode.get("choices").isEmpty()) {
                     String generatedText = rootNode.get("choices").get(0).path("message").path("content").asText();
-                    // Extract just the JSON part from the response if the model added extra text
+                    log.info("Generated idea text (first 300 chars): {}", generatedText.length() > 300 ? generatedText.substring(0, 300) : generatedText);
                     return extractJsonFromResponse(generatedText, prompt);
+                } else {
+                    log.warn("Unexpected API response structure from model {}: {}", model, rawResponse);
                 }
             } catch (IllegalArgumentException e) {
                 log.warn("Invalid input detected: {}", e.getMessage());
-                throw e; // Don't retry on invalid input
+                throw e;
             } catch (Exception e) {
-                log.warn("Error communicating with Hugging Face API or parsing JSON on attempt {}: {}", attempt, e.getMessage());
-                if (attempt == maxRetries) {
-                    log.error("All retries exhausted. Using mock fallback.", e);
-                    return createMockIdea(request);
-                }
+                log.warn("Error with model '{}' for idea generation: {}. Trying fallback model if available.", model, e.getMessage());
             }
         }
 
+        log.error("All AI models failed for idea generation. Using mock fallback.");
         return createMockIdea(request);
     }
 
     public String generateDetailedRoadmap(com.aigenerator.project_idea_generator.model.ProjectIdea idea) {
         String prompt = buildRoadmapPrompt(idea);
-        
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", "Qwen/Qwen2.5-Coder-32B-Instruct");
-        requestBody.put("temperature", 0.7); // slightly lower temperature for more structured planning
-        requestBody.put("messages", List.of(Map.of("role", "user", "content", prompt)));
 
-        int maxRetries = 3;
-        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+        for (String model : MODELS) {
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("model", model);
+            requestBody.put("temperature", 0.7);
+            requestBody.put("max_tokens", 1200);
+            requestBody.put("messages", List.of(Map.of("role", "user", "content", prompt)));
+
             try {
-                log.info("Sending roadmap request to Hugging Face API (Attempt {}/{})", attempt, maxRetries);
+                log.info("Sending roadmap request to AI Router using model '{}'", model);
                 adminFeatureService.recordApiCall("ROADMAP");
                 byte[] responseBytes = restClient.post()
                         .uri(apiUrl)
@@ -123,40 +130,61 @@ public class HuggingFaceService {
                         .retrieve()
                         .body(byte[].class);
 
+                String rawResponse = new String(responseBytes, java.nio.charset.StandardCharsets.UTF_8);
+                log.info("Raw API response (roadmap, model {}): {}", model, rawResponse.length() > 500 ? rawResponse.substring(0, 500) : rawResponse);
                 JsonNode rootNode = objectMapper.readTree(responseBytes);
 
                 if (rootNode != null && rootNode.has("choices") && rootNode.get("choices").isArray() && !rootNode.get("choices").isEmpty()) {
                     String generatedText = rootNode.get("choices").get(0).path("message").path("content").asText();
-                    return cleanMarkdownResponse(generatedText, prompt);
+                    if (generatedText != null && !generatedText.trim().isEmpty()) {
+                        log.info("Generated roadmap text (first 300 chars): {}", generatedText.length() > 300 ? generatedText.substring(0, 300) : generatedText);
+                        return cleanMarkdownResponse(generatedText, prompt);
+                    }
+                } else {
+                    log.warn("Unexpected roadmap API response structure from model {}: {}", model, rawResponse);
                 }
             } catch (Exception e) {
-                log.warn("Error communicating with Hugging Face API for roadmap on attempt {}: {}", attempt, e.getMessage());
-                if (attempt == maxRetries) {
-                    log.error("All retries exhausted for roadmap. Using mock fallback.", e);
-                    return "## Implementation Plan for " + idea.getProjectName() + "\n\n" +
-                           "*(Mock Roadmap generated due to API error)*\n\n" +
-                           "### Sprint 1: Setup\n- Initialize the " + idea.getFramework() + " project\n- Setup Database\n\n" +
-                           "### Sprint 2: Core Features\n- Implement core logic and APIs\n\n" +
-                           "### Sprint 3: UI & Polish\n- Build frontend\n- Final testing";
-                }
+                log.warn("Error with model '{}' for roadmap generation: {}. Trying fallback model if available.", model, e.getMessage());
             }
         }
 
-        throw new RuntimeException("Empty response from AI for roadmap.");
+        log.error("All models exhausted for roadmap. Using mock fallback.");
+        return "## Implementation Plan for " + idea.getProjectName() + "\n\n" +
+               "*(Mock Roadmap generated due to API error)*\n\n" +
+               "### Sprint 1: Setup\n- Initialize the " + idea.getFramework() + " project\n- Setup Database\n\n" +
+               "### Sprint 2: Core Features\n- Implement core logic and APIs\n\n" +
+               "### Sprint 3: UI & Polish\n- Build frontend\n- Final testing";
     }
 
     private String buildRoadmapPrompt(com.aigenerator.project_idea_generator.model.ProjectIdea idea) {
-        return "You are an expert Technical Project Manager and Lead Architect. " +
-               "Generate a highly detailed, step-by-step Sprint Roadmap to build the following project:\n\n" +
-               "**Project Name:** " + idea.getProjectName() + "\n" +
-               "**Description:** " + idea.getProjectDescription() + "\n" +
-               "**Tech Stack:** " + idea.getProgrammingLanguage() + " with " + idea.getFramework() + "\n" +
-               "**Skill Level:** " + idea.getSkillLevel() + "\n\n" +
-               "CRITICAL: You MUST write your ENTIRE response strictly in ENGLISH ONLY.\n\n" +
-               "Provide the response formatted in beautiful Markdown. " +
-               "Organize the roadmap into logical 'Sprints' or 'Phases' (e.g., Phase 1: Environment Setup, Phase 2: Database Design). " +
-               "Under each Sprint, provide a bulleted list of specific, actionable tasks tailored to the framework (" + idea.getFramework() + "). " +
-               "Do NOT wrap your entire response in a JSON block, just output pure Markdown text.";
+        String skillLevel = idea.getSkillLevel() != null ? idea.getSkillLevel() : "Beginner";
+        StringBuilder prompt = new StringBuilder();
+
+        // Concise system context — avoids wasting output tokens on preamble
+        prompt.append("You are an expert Technical Project Manager. Write a concise, actionable 4-sprint implementation roadmap.\n\n");
+        prompt.append("**Project:** ").append(idea.getProjectName()).append("\n");
+        prompt.append("**Description:** ").append(idea.getProjectDescription()).append("\n");
+        prompt.append("**Tech Stack:** ").append(idea.getProgrammingLanguage()).append(" / ").append(idea.getFramework()).append("\n");
+        prompt.append("**Developer Level:** ").append(skillLevel).append("\n\n");
+
+        prompt.append("STRICT RULES:\n");
+        prompt.append("- Write EXACTLY 4 sprints (Sprint 1 through Sprint 4). Each sprint has a clear ## heading and 5-6 bullet points.\n");
+        prompt.append("- Each bullet is one action sentence. No code blocks. No code snippets.\n");
+        prompt.append("- Tailor complexity to '").append(skillLevel).append("' level:\n");
+
+        if ("Beginner".equalsIgnoreCase(skillLevel)) {
+            prompt.append("  Beginner: Use only built-in framework features — routing, ORM, templates, forms, built-in auth. ")
+                  .append("NO WebSockets, NO async brokers, NO Docker, NO microservices.\n");
+        } else if ("Intermediate".equalsIgnoreCase(skillLevel)) {
+            prompt.append("  Intermediate: REST APIs, JWT/session auth, caching, database indexing, basic testing.\n");
+        } else {
+            prompt.append("  Advanced: Microservices, async messaging, containerization, CI/CD, scalability.\n");
+        }
+
+        prompt.append("- Sprint 4 MUST cover testing, final polish, and local/cloud deployment.\n");
+        prompt.append("- Write in English only. Output clean Markdown. Do NOT truncate — complete all 4 sprints.\n");
+
+        return prompt.toString();
     }
 
     private String cleanMarkdownResponse(String responseText, String prompt) {
@@ -202,9 +230,11 @@ public class HuggingFaceService {
         
         prompt += "CRITICAL INSTRUCTION: You MUST write your ENTIRE response strictly in ENGLISH ONLY. Do not use Chinese, Spanish, or any other language under any circumstances.\n\n" +
                "Please provide a completely unique idea each time. (Request ID: " + java.util.UUID.randomUUID().toString() + ")\n" +
-               "Make sure the complexity perfectly matches the '" + request.getSkillLevel() + "' level. " +
-               "For the API endpoints, do not just limit it to REST! Depending on what is best for the project and framework, " +
-               "you can suggest REST, GraphQL, gRPC, or WebSockets.\n\n" +
+               "Keep lists focused: 4 to 6 keyFeatures, 4 to 6 suggestedTables, 4 to 6 recommendedEndpoints, and 5 to 6 learningRoadmap steps.\n\n" +
+               "Make sure the architectural complexity strictly matches the developer's '" + request.getSkillLevel() + "' level:\n" +
+               "- If 'Beginner': Suggest foundational, clean concepts (standard RESTful endpoints or MVC routes, clear relational tables). DO NOT suggest advanced or complex protocols like WebSockets, gRPC, or async distributed brokers.\n" +
+               "- If 'Intermediate': Suggest modern industry-standard patterns (RESTful APIs, secure auth, caching, relational/document DBs, and optional WebSockets or GraphQL if genuinely needed).\n" +
+               "- If 'Advanced': Suggest enterprise architectures (microservices or modular monolith, GraphQL, gRPC, WebSockets, event-driven streaming, caching, and CI/CD).\n\n" +
                "If you aborted in STEP 1, respond ONLY with {\"projectName\": \"INVALID_INPUT\"}.\n" +
                "Otherwise, respond ONLY with a valid JSON object matching exactly this schema. " +
                "Do NOT wrap the JSON in markdown code blocks or backticks. Just output the raw JSON string:\n" +
@@ -221,50 +251,125 @@ public class HuggingFaceService {
     }
 
     private GeneratedIdea extractJsonFromResponse(String responseText, String prompt) {
-        try {
-            // Models often include the prompt in the response, we should remove it
-            String cleanText = responseText;
-            if (cleanText.startsWith(prompt)) {
-                cleanText = cleanText.substring(prompt.length());
-            }
-
-            // Find the first '{' and last '}'
-            int startIndex = cleanText.indexOf('{');
-            int endIndex = cleanText.lastIndexOf('}');
-            
-            if (startIndex != -1 && endIndex != -1 && startIndex < endIndex) {
-                String jsonStr = cleanText.substring(startIndex, endIndex + 1);
-                JsonNode rootNode = objectMapper.readTree(jsonStr);
-                
-                GeneratedIdea idea = new GeneratedIdea();
-                String pName = rootNode.path("projectName").asText("Unnamed Project");
-                if ("INVALID_INPUT".equals(pName)) {
-                    throw new IllegalArgumentException("INVALID_INPUT");
-                }
-                idea.setProjectName(pName);
-                idea.setProjectDescription(rootNode.path("projectDescription").asText("No description provided."));
-                
-                idea.setKeyFeatures(extractList(rootNode, "keyFeatures"));
-                idea.setSuggestedTables(extractList(rootNode, "suggestedTables"));
-                idea.setRecommendedEndpoints(extractList(rootNode, "recommendedEndpoints"));
-                idea.setLearningRoadmap(extractList(rootNode, "learningRoadmap"));
-                
-                return idea;
-            }
-        } catch (JsonProcessingException e) {
-            log.error("Failed to parse AI JSON response", e);
-            throw new RuntimeException("AI generated an invalid format.");
+        if (responseText == null || responseText.isBlank()) {
+            throw new RuntimeException("Empty AI response.");
         }
-        
-        throw new RuntimeException("Could not find JSON in AI response.");
+
+        String cleanText = responseText.trim();
+        if (cleanText.startsWith(prompt)) {
+            cleanText = cleanText.substring(prompt.length()).trim();
+        }
+
+        // 1. Try standard Jackson JSON parsing
+        int startIndex = cleanText.indexOf('{');
+        int endIndex = cleanText.lastIndexOf('}');
+        if (startIndex != -1 && endIndex != -1 && startIndex < endIndex) {
+            String jsonStr = cleanText.substring(startIndex, endIndex + 1);
+            try {
+                JsonNode rootNode = objectMapper.readTree(jsonStr);
+                GeneratedIdea idea = buildIdeaFromNode(rootNode);
+                if (idea != null) {
+                    return idea;
+                }
+            } catch (IllegalArgumentException e) {
+                throw e; // propagates INVALID_INPUT
+            } catch (JsonProcessingException e) {
+                log.warn("Jackson parse failed, attempting regex recovery: {}", e.getMessage());
+            }
+        }
+
+        // 2. Robust Regex Fallback - extracts fields directly from raw model output
+        GeneratedIdea regexIdea = extractIdeaWithRegex(cleanText);
+        if (regexIdea != null) {
+            log.info("Successfully recovered idea via regex parser: '{}'", regexIdea.getProjectName());
+            return regexIdea;
+        }
+
+        throw new RuntimeException("Could not parse AI response into a valid project idea.");
+    }
+
+    private GeneratedIdea buildIdeaFromNode(JsonNode rootNode) {
+        String pName = rootNode.path("projectName").asText("").trim();
+        if ("INVALID_INPUT".equalsIgnoreCase(pName)) {
+            throw new IllegalArgumentException("INVALID_INPUT");
+        }
+        if (pName.isEmpty() || "Unnamed Project".equals(pName)) {
+            return null;
+        }
+
+        GeneratedIdea idea = new GeneratedIdea();
+        idea.setProjectName(pName);
+        idea.setProjectDescription(rootNode.path("projectDescription").asText("A modern web application."));
+        idea.setKeyFeatures(extractList(rootNode, "keyFeatures"));
+        idea.setSuggestedTables(extractList(rootNode, "suggestedTables"));
+        idea.setRecommendedEndpoints(extractList(rootNode, "recommendedEndpoints"));
+        idea.setLearningRoadmap(extractList(rootNode, "learningRoadmap"));
+        return idea;
+    }
+
+    private GeneratedIdea extractIdeaWithRegex(String text) {
+        String projectName = matchSingle(text, "\"projectName\"\\s*:\\s*\"([^\"]+)\"");
+        if (projectName == null || projectName.isBlank()) {
+            return null;
+        }
+        if ("INVALID_INPUT".equalsIgnoreCase(projectName)) {
+            throw new IllegalArgumentException("INVALID_INPUT");
+        }
+
+        GeneratedIdea idea = new GeneratedIdea();
+        idea.setProjectName(projectName.trim());
+
+        String desc = matchSingle(text, "\"projectDescription\"\\s*:\\s*\"([^\"]+)\"");
+        idea.setProjectDescription(desc != null ? desc.trim() : "A modern web application.");
+
+        idea.setKeyFeatures(matchArray(text, "keyFeatures"));
+        idea.setSuggestedTables(matchArray(text, "suggestedTables"));
+        idea.setRecommendedEndpoints(matchArray(text, "recommendedEndpoints"));
+        idea.setLearningRoadmap(matchArray(text, "learningRoadmap"));
+
+        return idea;
+    }
+
+    private String matchSingle(String text, String regex) {
+        Matcher m = Pattern.compile(regex).matcher(text);
+        if (m.find()) {
+            return m.group(1);
+        }
+        return null;
+    }
+
+    private List<String> matchArray(String text, String fieldName) {
+        List<String> list = new ArrayList<>();
+        Pattern arrayPattern = Pattern.compile("\"" + fieldName + "\"\\s*:\\s*\\[([\\s\\S]*?)\\]");
+        Matcher arrayMatcher = arrayPattern.matcher(text);
+        if (arrayMatcher.find()) {
+            String itemsContent = arrayMatcher.group(1);
+            Pattern itemPattern = Pattern.compile("\"([^\"]+)\"");
+            Matcher itemMatcher = itemPattern.matcher(itemsContent);
+            while (itemMatcher.find()) {
+                String val = itemMatcher.group(1).trim();
+                if (!val.isEmpty()) {
+                    list.add(val);
+                }
+            }
+        }
+        return list;
     }
     
     private List<String> extractList(JsonNode rootNode, String fieldName) {
         List<String> list = new ArrayList<>();
-        JsonNode arrayNode = rootNode.path(fieldName);
-        if (arrayNode.isArray()) {
-            for (JsonNode node : arrayNode) {
-                list.add(node.asText());
+        JsonNode node = rootNode.path(fieldName);
+        if (node.isArray()) {
+            for (JsonNode item : node) {
+                list.add(item.asText());
+            }
+        } else if (node.isTextual()) {
+            String text = node.asText();
+            for (String line : text.split("\\r?\\n")) {
+                String trimmed = line.trim();
+                if (!trimmed.isEmpty()) {
+                    list.add(trimmed);
+                }
             }
         }
         return list;
