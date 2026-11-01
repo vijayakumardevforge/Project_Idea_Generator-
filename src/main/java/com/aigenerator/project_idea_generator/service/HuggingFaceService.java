@@ -42,6 +42,17 @@ public class HuggingFaceService {
     @Value("${huggingface.api.token.roadmap}")
     private String apiTokenRoadmap;
 
+    @jakarta.annotation.PostConstruct
+    public void initTokens() {
+        String groqEnv = System.getenv("GROQ_API_KEY");
+        if (groqEnv != null && !groqEnv.isBlank()) {
+            String trimmed = groqEnv.trim();
+            log.info("Explicitly overriding AI tokens with GROQ_API_KEY from environment");
+            this.apiTokenIdea = trimmed;
+            this.apiTokenRoadmap = trimmed;
+        }
+    }
+
     public HuggingFaceService(AdminFeatureService adminFeatureService) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(10000);
